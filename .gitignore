@@ -1,0 +1,13 @@
+*~
+*.o
+*.py[ocd]
+*.a
+.DS_Store?
+
+/pyh5md/version.py
+/build
+/dist
+/doc/build
+/doc/html
+
+MANIFEST
