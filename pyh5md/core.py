@@ -83,6 +83,12 @@ class H5MD_File(object):
         return TrajectoryGroup(self.f, group_name)
 
 
+    def check(self):
+        """Checks the file conformance."""
+        # Checks the presence of the global attributes.
+        attrs = set(['author', 'creator', 'creator_version', 'creation_time', 'version'])
+        assert(attrs <= set(self.f['h5md'].attrs.keys()))
+        assert(self.f['h5md'].attrs['version'].shape==(2,))
     
             
         
