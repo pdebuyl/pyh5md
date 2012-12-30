@@ -52,8 +52,8 @@ class TrajectoryGroup(h5py.Group):
             self._id = h5py.h5g.open(t.id, name)
         else:
             self._id = h5py.h5g.create(t.id, name)
-    def add_data(self, name, shape, dtype):
-        return Trajectory(self, name, shape, dtype)
+    def data(self, *args,**kwargs):
+        return Trajectory(self, *args,**kwargs)
 
 class H5MD_File(object):
     """Class to create and read H5MD compliant files."""

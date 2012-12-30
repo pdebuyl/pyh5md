@@ -7,7 +7,7 @@ at = f.trajectory('atoms')
 
 r = np.zeros((100,3), dtype=np.float64)
 
-at_pos = at.add_data('position', r.shape, r.dtype)
+at_pos = at.data('position', r.shape, r.dtype)
 
 at_pos.append(r, 0, 0.)
 
