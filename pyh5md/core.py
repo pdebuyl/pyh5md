@@ -13,9 +13,14 @@ def populate_H5MD_data(g, name, shape, dtype):
 
 class Trajectory(h5py.Group):
     """Represents a trajectory group within a H5MD file."""
-    def __init__(self, parent, name, shape, dtype):
+    def __init__(self, parent, name=None, shape=None, dtype=None):
         """Create a new Trajectory object."""
-        if name in TRAJECTORY_NAMES:
+        if name in parent.keys():
+            self._id = h5py.h5g.open(parent.id, name)
+            self.s = self['step']
+            self.t = self['time']
+            self.v = self['value']
+        elif name in TRAJECTORY_NAMES:
             self._id = h5py.h5g.create(parent.id, name)
             populate_H5MD_data(self,name,shape, dtype)
         else:
