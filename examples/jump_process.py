@@ -1,3 +1,10 @@
+# Copyright 2012 Pierre de Buyl
+#
+# This file is part of pyh5md
+#
+# pyh5md is free software and is licensed under the modified BSD license (see
+# LICENSE file).
+
 import numpy as np
 import pyh5md
 
