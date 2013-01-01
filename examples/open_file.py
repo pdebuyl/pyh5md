@@ -10,9 +10,9 @@ import pyh5md
 
 f = pyh5md.H5MD_File('poc.h5', 'r')
 
-at = f.trajectory('atoms')
+at = f.trajectory_group('atoms')
 
-at_pos = at.data('position')
+at_pos = at.trajectory('position')
 
 r = at_pos.v.value
 

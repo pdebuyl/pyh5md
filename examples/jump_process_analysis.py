@@ -14,10 +14,10 @@ f = pyh5md.H5MD_File('poc.h5', 'r')
 f.check()
 
 # Open a trajectory group
-part = f.trajectory('particles')
+part = f.trajectory_group('particles')
 
 # Open trajectory position data element in the trajectory group
-part_pos = part.data('position')
+part_pos = part.trajectory('position')
 
 # Get data and time
 r = part_pos.v

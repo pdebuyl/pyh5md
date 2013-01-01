@@ -12,13 +12,13 @@ import pyh5md
 f = pyh5md.H5MD_File('poc.h5', 'w', creator='pyh5md examples/jump_process.py', creator_version='0', author='Pierre de Buyl')
 
 # Add a trajectory group
-part = f.trajectory('particles')
+part = f.trajectory_group('particles')
 
 # Create the trajectory data
 r = np.zeros((10,1), dtype=np.int32)
 
 # Add the trajectory position data element in the trajectory group
-part_pos = part.data('position', r.shape, r.dtype)
+part_pos = part.trajectory('position', r.shape, r.dtype)
 
 # Run a simulation
 step=0

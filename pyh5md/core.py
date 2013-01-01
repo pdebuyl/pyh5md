@@ -58,7 +58,7 @@ class TrajectoryGroup(h5py.Group):
             self._id = h5py.h5g.open(t.id, name)
         else:
             self._id = h5py.h5g.create(t.id, name)
-    def data(self, *args,**kwargs):
+    def trajectory(self, *args,**kwargs):
         return Trajectory(self, *args,**kwargs)
 
 class H5MD_File(object):
@@ -83,7 +83,7 @@ class H5MD_File(object):
             self.f['h5md'].attrs['version'] = np.array([1,0])
             self.f['h5md'].attrs['creation_time'] = int(time.time())
 
-    def trajectory(self, group_name):
+    def trajectory_group(self, group_name):
         """Adds or open a group in /trajectory. If /trajectory does not exist,
         it will be created."""
         return TrajectoryGroup(self.f, group_name)
