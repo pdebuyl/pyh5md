@@ -61,6 +61,40 @@ class TrajectoryGroup(h5py.Group):
     def trajectory(self, *args,**kwargs):
         return Trajectory(self, *args,**kwargs)
 
+class Observable(h5py.Group):
+    """Represents an observable within a H5MD file."""
+    def __init__(self, parent, name, shape=None, dtype=None):
+        """Create a new Observable object."""
+        if 'observables' not in parent.keys():
+            parent.create_group('observables')
+        o = parent['observables']
+        if name in o.keys():
+            self._id = h5py.h5g.open(o.id, name)
+            self.s = self['step']
+            self.t = self['time']
+            self.v = self['value']
+        else:
+            self._id = h5py.h5g.create(o.id, name)
+            populate_H5MD_data(self, name, shape, dtype)
+
+    def append(self, data, step, time):
+        """Appends a time slice to the data group."""
+        s = self['step']
+        t = self['time']
+        v = self['value']
+        if not isinstance(data, np.ndarray):
+            data = np.array(data, ndmin=1)
+        assert s.shape[0]==t.shape[0] and t.shape[0]==v.shape[0]
+        if data.shape==v.shape[1:] and data.dtype==v.dtype:
+            idx = v.shape[0]
+            v.resize(idx+1,axis=0)
+            v[-1] = data
+            s.resize(idx+1, axis=0)
+            s[-1] = step
+            t.resize(idx+1, axis=0)
+            t[-1] = time
+
+
 class H5MD_File(object):
     """Class to create and read H5MD compliant files."""
     def __init__(self,filename,mode,**kwargs):
@@ -88,6 +122,8 @@ class H5MD_File(object):
         it will be created."""
         return TrajectoryGroup(self.f, group_name)
 
+    def observable(self, obs_name, shape, dtype):
+        return Observable(self.f,obs_name, shape, dtype)
 
     def check(self):
         """Checks the file conformance."""
