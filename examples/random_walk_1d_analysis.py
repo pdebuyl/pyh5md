@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pyh5md
 
 # Open a H5MD file
-f = pyh5md.H5MD_File('poc.h5', 'r')
+f = pyh5md.H5MD_File('walk_1d.h5', 'r')
 f.check()
 
 # Open a trajectory group

@@ -9,7 +9,7 @@ import numpy as np
 import pyh5md
 
 # Open a H5MD file
-f = pyh5md.H5MD_File('poc.h5', 'w', creator='pyh5md examples/jump_process.py', creator_version='0', author='Pierre de Buyl')
+f = pyh5md.H5MD_File('walk_1d.h5', 'w', creator='pyh5md examples/jump_process.py', creator_version='0', author='Pierre de Buyl')
 
 # Add a trajectory group
 part = f.trajectory_group('particles')
