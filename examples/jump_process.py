@@ -29,7 +29,7 @@ time=0.
 for i in range(100):
     step+=1
     time+=.1
-    r += np.random.random_integers(-1,1,r.shape)
+    r += -1 + 2*np.random.random_integers(0,1,r.shape)
     # Append the current position data to the H5MD file.
     part_pos.append(r, step, time)
     obs_sin.append(np.sin(time), step, time)
