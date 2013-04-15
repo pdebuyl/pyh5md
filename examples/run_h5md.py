@@ -1,4 +1,4 @@
-# Copyright 2012 Pierre de Buyl
+# Copyright 2012-2013 Pierre de Buyl
 #
 # This file is part of pyh5md
 #
