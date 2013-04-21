@@ -122,8 +122,8 @@ class H5MD_File(object):
         it will be created."""
         return TrajectoryGroup(self.f, group_name)
 
-    def observable(self, obs_name, shape, dtype):
-        return Observable(self.f,obs_name, shape, dtype)
+    def observable(self, obs_name,*args,**kwargs):
+        return Observable(self.f,obs_name,*args,**kwargs)
 
     def check(self):
         """Checks the file conformance."""
