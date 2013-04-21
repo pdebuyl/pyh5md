@@ -39,6 +39,15 @@ plt.xlabel(r'$t$')
 plt.xlabel(r'$t$')
 plt.legend()
 
+# Create a new figure
+plt.figure()
+
+# Obtain and plot the center_of_mass observable
+obs_com = f.observable('center_of_mass')
+plt.plot(obs_com.t, obs_com.v, 'k-')
+plt.xlabel(r'$t$')
+plt.ylabel(r'center of mass')
+
 # Close the file
 f.f.close()
 

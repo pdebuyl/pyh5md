@@ -21,7 +21,7 @@ r = np.zeros((10,1), dtype=np.int32)
 part_pos = part.trajectory('position', r.shape, r.dtype)
 
 # Create an observable
-obs_sin = f.observable('sin', (1,), np.float64)
+obs_com = f.observable('center_of_mass', (1,), np.float64)
 
 # Run a simulation
 step=0
@@ -32,7 +32,7 @@ for i in range(100):
     r += -1 + 2*np.random.random_integers(0,1,r.shape)
     # Append the current position data to the H5MD file.
     part_pos.append(r, step, time)
-    obs_sin.append(np.sin(time), step, time)
+    obs_com.append(r[:,0].mean(), step, time)
 
 # Close the file
 f.f.close()
