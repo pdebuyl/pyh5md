@@ -10,12 +10,38 @@ import h5py
 import time
 
 TRAJECTORY_NAMES = ['position', 'velocity', 'force', 'species']
+H5MD_SET = frozenset(['step', 'time', 'value'])
 
 def populate_H5MD_data(g, name, shape, dtype):
     """Creates a step,time,value H5MD data group."""
     g.s = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
     g.t = g.create_dataset('time', shape=(0,), dtype=np.float64, maxshape=(None,))
     g.v = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,)+shape)
+
+def is_h5md(g):
+    """Check whether a group is a well-defined H5MD time-dependent group."""
+    if set(g.keys()) <= H5MD_SET:
+        s_d = len(g['step'].shape)
+        s_l = g['step'].shape[0]
+        t_d = len(g['time'].shape)
+        t_l = g['time'].shape[0]
+        v_l = g['value'].shape[0]
+        return (
+            (s_d == 1) and (t_d == 1) and (s_l == t_l) and (s_l == v_l)
+            )
+    else:
+        return False
+
+def walk(g, test=None):
+    """Returns all groups."""
+    if type(g)==h5py.Group:
+        if test:
+            if test(g): print g
+        else:
+            print g
+        for k in g.keys():
+            walk(g[k], test)
+
 
 class Trajectory(h5py.Group):
     """Represents a trajectory group within a H5MD file."""
@@ -131,6 +157,8 @@ class H5MD_File(object):
         attrs = set(['author', 'creator', 'creator_version', 'creation_time', 'version'])
         assert(attrs <= set(self.f['h5md'].attrs.keys()))
         assert(self.f['h5md'].attrs['version'].shape==(2,))
+        for g in ['trajectory','observables']:
+            walk(self.f[g],is_h5md)
+
+
     
-            
-        
