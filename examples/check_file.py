@@ -14,6 +14,4 @@ f = pyh5md.H5MD_File('poc.h5', 'r')
 
 f.check()
 
-pyh5md.walk(f.f['trajectory'])
-
 f.f.close()

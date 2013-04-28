@@ -19,29 +19,44 @@ def populate_H5MD_data(g, name, shape, dtype):
     g.v = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,)+shape)
 
 def is_h5md(g):
-    """Check whether a group is a well-defined H5MD time-dependent group."""
+    """Check whether a group is a well-defined H5MD time-dependent group. Raises
+    an exception if a group contains the elements of H5MD_SET but does not
+    comply to an equal length for all of them."""
     if set(g.keys()) <= H5MD_SET:
         s_d = len(g['step'].shape)
         s_l = g['step'].shape[0]
         t_d = len(g['time'].shape)
         t_l = g['time'].shape[0]
         v_l = g['value'].shape[0]
-        return (
+        assert(
             (s_d == 1) and (t_d == 1) and (s_l == t_l) and (s_l == v_l)
             )
+        return True
     else:
         return False
 
-def walk(g, test=None):
-    """Returns all groups."""
-    if type(g)==h5py.Group:
-        if test:
-            if test(g): print g
-        else:
-            print g
-        for k in g.keys():
-            walk(g[k], test)
+class Walker(object):
+    """Finds all HDF5 groups within a given group."""
+    def __init__(self, f):
+        self.f = f
+        self.walk_list = []
 
+    def walk(self, g=None):
+        if g==None:
+            g = self.f['observables']
+        if type(g)==h5py.Group:
+            if is_h5md(g): self.walk_list.append(g)
+            for k in g.keys():
+                self.walk(g[k])
+
+    def get_list(self):
+        return self.walk_list
+
+    def check(self):
+        if len(self.walk_list)==0:
+            raise Exception('Nothing to check')
+        for g in self.walk_list:
+            assert(is_h5md(g))
 
 class Trajectory(h5py.Group):
     """Represents a trajectory group within a H5MD file."""
@@ -156,9 +171,13 @@ class H5MD_File(object):
         # Checks the presence of the global attributes.
         attrs = set(['author', 'creator', 'creator_version', 'creation_time', 'version'])
         assert(attrs <= set(self.f['h5md'].attrs.keys()))
+        # Check that version is of appropriate shape.
         assert(self.f['h5md'].attrs['version'].shape==(2,))
+        w = Walker(self.f)
         for g in ['trajectory','observables']:
-            walk(self.f[g],is_h5md)
+            w.walk(self.f[g])
+        w.check()
+
 
 
     
