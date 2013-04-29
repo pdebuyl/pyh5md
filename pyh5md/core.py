@@ -158,6 +158,10 @@ class H5MD_File(object):
             self.f['h5md'].attrs['version'] = np.array([1,0])
             self.f['h5md'].attrs['creation_time'] = int(time.time())
 
+    def close(self):
+        """Closes the HDF5 file."""
+        self.f.close()
+
     def trajectory_group(self, group_name):
         """Adds or open a group in /trajectory. If /trajectory does not exist,
         it will be created."""
