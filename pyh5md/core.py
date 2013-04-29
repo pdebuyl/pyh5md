@@ -22,7 +22,7 @@ def is_h5md(g):
     """Check whether a group is a well-defined H5MD time-dependent group. Raises
     an exception if a group contains the elements of H5MD_SET but does not
     comply to an equal length for all of them."""
-    if set(g.keys()) <= H5MD_SET:
+    if H5MD_SET <= set(g.keys()):
         s_d = len(g['step'].shape)
         s_l = g['step'].shape[0]
         t_d = len(g['time'].shape)
@@ -43,7 +43,7 @@ class Walker(object):
 
     def walk(self, g=None):
         if g==None:
-            g = self.f['observables']
+            g = self.f['/']
         if type(g)==h5py.Group:
             if is_h5md(g): self.walk_list.append(g)
             for k in g.keys():
@@ -174,10 +174,4 @@ class H5MD_File(object):
         # Check that version is of appropriate shape.
         assert(self.f['h5md'].attrs['version'].shape==(2,))
         w = Walker(self.f)
-        for g in ['trajectory','observables']:
-            w.walk(self.f[g])
-        w.check()
-
-
-
-    
+        w.walk()
