@@ -8,7 +8,7 @@
 import numpy as np
 import pyh5md
 
-f = pyh5md.H5MD_File('poc.h5', 'w', creator='run_h5md', creator_version='0', author='Pierre de Buyl')
+f = pyh5md.H5MD_File('particles_3d.h5', 'w', creator='run_h5md', creator_version='0', author='Pierre de Buyl')
 
 # Creating atom group
 at = f.trajectory_group('atoms')
