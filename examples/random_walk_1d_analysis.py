@@ -49,6 +49,6 @@ plt.xlabel(r'$t$')
 plt.ylabel(r'center of mass')
 
 # Close the file
-f.f.close()
+f.close()
 
 plt.show()

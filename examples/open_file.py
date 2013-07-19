@@ -18,4 +18,4 @@ r = at_pos.v.value
 
 print r
 
-f.f.close()
+f.close()

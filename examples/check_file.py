@@ -14,4 +14,4 @@ f = pyh5md.H5MD_File('particles_3d.h5', 'r')
 
 f.check()
 
-f.f.close()
+f.close()

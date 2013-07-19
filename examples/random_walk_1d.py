@@ -35,4 +35,4 @@ for i in range(100):
     obs_com.append(r[:,0].mean(), step, time)
 
 # Close the file
-f.f.close()
+f.close()

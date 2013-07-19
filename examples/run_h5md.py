@@ -36,4 +36,4 @@ for t in xrange(201):
     r += DT*0.5*v
     time += DT
 
-f.f.close()
+f.close()
