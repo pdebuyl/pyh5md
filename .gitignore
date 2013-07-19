@@ -3,6 +3,7 @@
 *.py[ocd]
 *.a
 .DS_Store?
+*.h5
 
 /pyh5md/version.py
 /build
