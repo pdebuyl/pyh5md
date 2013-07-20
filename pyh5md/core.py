@@ -96,6 +96,7 @@ class TimeData(h5py.Group):
             t[-1] = time
 
 class FixedData(h5py.Dataset):
+    """Represents time-independent data within a H5MD file."""
     def __init__(self, parent, name, shape=None, dtype=None, data=None):
         if name not in parent.keys():
             parent.create_dataset(name, shape, dtype)
@@ -133,6 +134,7 @@ class TrajectoryGroup(h5py.Group):
         else:
             self._id = h5py.h5g.create(t.id, name)
     def trajectory(self, name, shape=None, dtype=None, data=None, time=True):
+        """Returns data as a TimeData or FixedData object."""
         return particle_data(self, name, shape, dtype, data, time=True)
 
 
@@ -168,6 +170,7 @@ class H5MD_File(object):
         return TrajectoryGroup(self.f, group_name)
 
     def observable(self, obs_name,*args,**kwargs):
+        """Returns observable data as a TimeData object."""
         if 'observables' not in self.f.keys():
             self.f.create_group('observables')
         return TimeData(self.f['observables'],obs_name,*args,**kwargs)
