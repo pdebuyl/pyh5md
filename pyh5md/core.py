@@ -60,7 +60,7 @@ class Walker(object):
 
 class TimeData(h5py.Group):
     """Represents time-dependent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None):
         """Create a new TimeData object."""
         if name in parent.keys():
             self._id = h5py.h5g.open(parent.id, name)
@@ -68,8 +68,15 @@ class TimeData(h5py.Group):
             self.time = self['time']
             self.value = self['value']
         else:
-            self._id = h5py.h5g.create(parent.id, name)
-            populate_H5MD_data(self, name, shape, dtype)
+            if data:
+                if shape or isinstance(dtype, np.dtype):
+                    raise Exception('Overspecification')
+                else:
+                    self._id = h5py.h5g.create(parent.id, name)
+                    populate_H5MD_data(self, name, data.shape, data.dtype)
+            else:
+                self._id = h5py.h5g.create(parent.id, name)
+                populate_H5MD_data(self, name, shape, dtype)
 
     def append(self, data, step, time):
         """Appends a time slice to the data group."""
@@ -89,7 +96,7 @@ class TimeData(h5py.Group):
             t[-1] = time
 
 class FixedData(h5py.Dataset):
-    def __init__(self, parent, name, shape=None, dtype=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None):
         if name not in parent.keys():
             parent.create_dataset(name, shape, dtype)
         self._id = h5py.h5d.open(parent.id, name)
@@ -111,9 +118,9 @@ def particle_data(traj_group, name=None, shape=None, dtype=None, data=None, time
     else:
         if shape and isinstance(dtype,np.dtype):
             if time:
-                return TimeData(traj_group, name, shape, dtype)
+                return TimeData(traj_group, name, shape, dtype, data)
             else:
-                return FixedData(traj_group, name, shape=shape, dtype=dtype)
+                return FixedData(traj_group, name, shape, dtype, data)
         else:
             raise Exception('No data, shape and/or dtype provided')
 
@@ -129,8 +136,8 @@ class TrajectoryGroup(h5py.Group):
             self._id = h5py.h5g.open(t.id, name)
         else:
             self._id = h5py.h5g.create(t.id, name)
-    def trajectory(self, *args,**kwargs):
-        return particle_data(self, *args,**kwargs)
+    def trajectory(self, name, shape=None, dtype=None, data=None, time=True):
+        return particle_data(self, name, shape, dtype, data, time=True)
 
 
 class H5MD_File(object):
