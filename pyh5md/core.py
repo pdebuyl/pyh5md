@@ -68,8 +68,8 @@ class TimeData(h5py.Group):
             self.time = self['time']
             self.value = self['value']
         else:
-            if data:
-                if shape or isinstance(dtype, np.dtype):
+            if data is not None:
+                if shape is not None or isinstance(dtype, np.dtype):
                     raise Exception('Overspecification')
                 else:
                     self._id = h5py.h5g.create(parent.id, name)
@@ -116,14 +116,10 @@ def particle_data(traj_group, name=None, shape=None, dtype=None, data=None, time
         else:
             raise Exception('name does not provide H5MD data')
     else:
-        if shape and isinstance(dtype,np.dtype):
-            if time:
-                return TimeData(traj_group, name, shape, dtype, data)
-            else:
-                return FixedData(traj_group, name, shape, dtype, data)
+        if time:
+            return TimeData(traj_group, name, shape, dtype, data)
         else:
-            raise Exception('No data, shape and/or dtype provided')
-
+            return FixedData(traj_group, name, shape, dtype, data)
 
 class TrajectoryGroup(h5py.Group):
     """Represents a trajectory group within a H5MD file."""
