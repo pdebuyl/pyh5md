@@ -58,64 +58,17 @@ class Walker(object):
         for g in self.walk_list:
             assert(is_h5md(g))
 
-class Trajectory(h5py.Group):
-    """Represents a trajectory group within a H5MD file."""
-    def __init__(self, parent, name=None, shape=None, dtype=None):
-        """Create a new Trajectory object."""
+class TimeData(h5py.Group):
+    """Represents time-dependent data within a H5MD file."""
+    def __init__(self, parent, name, shape=None, dtype=None):
+        """Create a new TimeData object."""
         if name in parent.keys():
             self._id = h5py.h5g.open(parent.id, name)
-            self.s = self['step']
-            self.t = self['time']
-            self.v = self['value']
-        elif name in TRAJECTORY_NAMES:
+            self.step = self['step']
+            self.time = self['time']
+            self.value = self['value']
+        else:
             self._id = h5py.h5g.create(parent.id, name)
-            populate_H5MD_data(self,name,shape, dtype)
-        else:
-            raise Exception('Name not in TRAJECTORY_NAMES')
-    def append(self, data, step, time):
-        """Appends a time slice to the data group."""
-        s = self['step']
-        t = self['time']
-        v = self['value']
-        assert s.shape[0]==t.shape[0] and t.shape[0]==v.shape[0]
-        if data.shape==v.shape[1:] and data.dtype==v.dtype:
-            idx = v.shape[0]
-            v.resize(idx+1,axis=0)
-            v[-1] = data
-            s.resize(idx+1, axis=0)
-            s[-1] = step
-            t.resize(idx+1, axis=0)
-            t[-1] = time
-            
-
-class TrajectoryGroup(h5py.Group):
-    """Represents the root trajectory group within a H5MD file."""
-    def __init__(self, parent, name):
-        """Create a new TrajectoryGroup object."""
-        if 'trajectory' not in parent.keys():
-            parent.create_group('trajectory')
-        t = parent['trajectory']
-        if name in t.keys():
-            self._id = h5py.h5g.open(t.id, name)
-        else:
-            self._id = h5py.h5g.create(t.id, name)
-    def trajectory(self, *args,**kwargs):
-        return Trajectory(self, *args,**kwargs)
-
-class Observable(h5py.Group):
-    """Represents an observable within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None):
-        """Create a new Observable object."""
-        if 'observables' not in parent.keys():
-            parent.create_group('observables')
-        o = parent['observables']
-        if name in o.keys():
-            self._id = h5py.h5g.open(o.id, name)
-            self.s = self['step']
-            self.t = self['time']
-            self.v = self['value']
-        else:
-            self._id = h5py.h5g.create(o.id, name)
             populate_H5MD_data(self, name, shape, dtype)
 
     def append(self, data, step, time):
@@ -134,6 +87,50 @@ class Observable(h5py.Group):
             s[-1] = step
             t.resize(idx+1, axis=0)
             t[-1] = time
+
+class FixedData(h5py.Dataset):
+    def __init__(self, parent, name, shape=None, dtype=None):
+        if name not in parent.keys():
+            parent.create_dataset(name, shape, dtype)
+        self._id = h5py.h5d.open(parent.id, name)
+
+def particle_data(traj_group, name=None, shape=None, dtype=None, data=None, time=True):
+    """Returns particles data as a FixedData or TimeData."""
+    if name is None:
+        raise Exception('No name provided')
+    if name in traj_group.keys():
+        item = traj_group[name]
+        if type(item)==h5py.Group:
+            assert is_h5md(item)
+            return TimeData(traj_group, name)
+        elif type(item)==h5py.Dataset:
+            assert shape==dtype==data==None
+            return FixedData(traj_group, name)
+        else:
+            raise Exception('name does not provide H5MD data')
+    else:
+        if shape and isinstance(dtype,np.dtype):
+            if time:
+                return TimeData(traj_group, name, shape, dtype)
+            else:
+                return FixedData(traj_group, name, shape=shape, dtype=dtype)
+        else:
+            raise Exception('No data, shape and/or dtype provided')
+
+
+class TrajectoryGroup(h5py.Group):
+    """Represents a trajectory group within a H5MD file."""
+    def __init__(self, parent, name):
+        """Create a new TrajectoryGroup object."""
+        if 'trajectory' not in parent.keys():
+            parent.create_group('trajectory')
+        t = parent['trajectory']
+        if name in t.keys():
+            self._id = h5py.h5g.open(t.id, name)
+        else:
+            self._id = h5py.h5g.create(t.id, name)
+    def trajectory(self, *args,**kwargs):
+        return particle_data(self, *args,**kwargs)
 
 
 class H5MD_File(object):
@@ -168,8 +165,10 @@ class H5MD_File(object):
         return TrajectoryGroup(self.f, group_name)
 
     def observable(self, obs_name,*args,**kwargs):
-        return Observable(self.f,obs_name,*args,**kwargs)
-
+        if 'observables' not in self.f.keys():
+            self.f.create_group('observables')
+        return TimeData(self.f['observables'],obs_name,*args,**kwargs)
+        
     def check(self):
         """Checks the file conformance."""
         # Checks the presence of the global attributes.
