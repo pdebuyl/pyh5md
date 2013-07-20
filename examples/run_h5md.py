@@ -17,6 +17,10 @@ at = f.trajectory_group('atoms')
 r = np.zeros((100,3), dtype=np.float64)
 at_pos = at.trajectory('position', r.shape, r.dtype)
 
+# Creating species
+s = np.ones(r.shape[:1])
+at_s = at.trajectory('species', data=s, time=False)
+
 # Creating velocity data
 v = np.zeros((100,3), dtype=np.float64)
 at_v = at.trajectory('velocity', v.shape, v.dtype)
