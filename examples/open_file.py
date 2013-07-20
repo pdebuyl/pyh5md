@@ -14,7 +14,7 @@ at = f.trajectory_group('atoms')
 
 at_pos = at.trajectory('position')
 
-r = at_pos.v.value
+r = at_pos.value
 
 print r
 

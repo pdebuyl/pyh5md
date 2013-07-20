@@ -20,8 +20,8 @@ part = f.trajectory_group('particles')
 part_pos = part.trajectory('position')
 
 # Get data and time
-r = part_pos.v
-r_time = part_pos.t
+r = part_pos.value
+r_time = part_pos.time
 
 # Compute the MSD
 # The sum over "axis=2" is over the spatial components of the positions
@@ -44,7 +44,7 @@ plt.figure()
 
 # Obtain and plot the center_of_mass observable
 obs_com = f.observable('center_of_mass')
-plt.plot(obs_com.t, obs_com.v, 'k-')
+plt.plot(obs_com.time, obs_com.value, 'k-')
 plt.xlabel(r'$t$')
 plt.ylabel(r'center of mass')
 
