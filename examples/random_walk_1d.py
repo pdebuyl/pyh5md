@@ -12,7 +12,7 @@ import pyh5md
 f = pyh5md.H5MD_File('walk_1d.h5', 'w', creator='pyh5md examples/jump_process.py', creator_version='0', author='Pierre de Buyl')
 
 # Add a trajectory group
-part = f.trajectory_group('particles')
+part = f.particles_group('particles')
 
 # Create the trajectory data
 r = np.zeros((10,1), dtype=np.int32)

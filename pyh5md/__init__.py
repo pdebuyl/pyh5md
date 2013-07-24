@@ -23,6 +23,6 @@ except ImportError:
 
 from core import *
 
-__all__ = ["H5MD_File", "TrajectoryGroup", "Trajectory"]
+__all__ = ["H5MD_File"]
 
 

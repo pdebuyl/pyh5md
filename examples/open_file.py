@@ -10,7 +10,7 @@ import pyh5md
 
 f = pyh5md.H5MD_File('particles_3d.h5', 'r')
 
-at = f.trajectory_group('atoms')
+at = f.particles_group('atoms')
 
 at_pos = at.trajectory('position')
 

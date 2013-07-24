@@ -122,17 +122,17 @@ def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True
         else:
             return FixedData(group, name, shape, dtype, data)
 
-class TrajectoryGroup(h5py.Group):
-    """Represents a trajectory group within a H5MD file."""
+class ParticlesGroup(h5py.Group):
+    """Represents a particles group within a H5MD file."""
     def __init__(self, parent, name):
-        """Create a new TrajectoryGroup object."""
-        if 'trajectory' not in parent.keys():
-            parent.create_group('trajectory')
-        t = parent['trajectory']
-        if name in t.keys():
-            self._id = h5py.h5g.open(t.id, name)
+        """Create a new ParticlesGroup object."""
+        if 'particles' not in parent.keys():
+            parent.create_group('particles')
+        p = parent['particles']
+        if name in p.keys():
+            self._id = h5py.h5g.open(p.id, name)
         else:
-            self._id = h5py.h5g.create(t.id, name)
+            self._id = h5py.h5g.create(p.id, name)
     def trajectory(self, name, shape=None, dtype=None, data=None, time=True):
         """Returns data as a TimeData or FixedData object."""
         return particle_data(self, name, shape, dtype, data, time=True)
@@ -164,10 +164,10 @@ class H5MD_File(object):
         """Closes the HDF5 file."""
         self.f.close()
 
-    def trajectory_group(self, group_name):
-        """Adds or open a group in /trajectory. If /trajectory does not exist,
+    def particles_group(self, group_name):
+        """Adds or open a group in /particles. If /particles does not exist,
         it will be created."""
-        return TrajectoryGroup(self.f, group_name)
+        return ParticlesGroup(self.f, group_name)
 
     def observable(self, obs_name,*args,**kwargs):
         """Returns observable data as a TimeData object."""

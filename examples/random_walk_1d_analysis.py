@@ -14,7 +14,7 @@ f = pyh5md.H5MD_File('walk_1d.h5', 'r')
 f.check()
 
 # Open a trajectory group
-part = f.trajectory_group('particles')
+part = f.particles_group('particles')
 
 # Open trajectory position data element in the trajectory group
 part_pos = part.trajectory('position')
