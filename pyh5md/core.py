@@ -102,25 +102,25 @@ class FixedData(h5py.Dataset):
             parent.create_dataset(name, shape, dtype)
         self._id = h5py.h5d.open(parent.id, name)
 
-def particle_data(traj_group, name=None, shape=None, dtype=None, data=None, time=True):
+def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True):
     """Returns particles data as a FixedData or TimeData."""
     if name is None:
         raise Exception('No name provided')
-    if name in traj_group.keys():
-        item = traj_group[name]
+    if name in group.keys():
+        item = group[name]
         if type(item)==h5py.Group:
             assert is_h5md(item)
-            return TimeData(traj_group, name)
+            return TimeData(group, name)
         elif type(item)==h5py.Dataset:
             assert shape==dtype==data==None
-            return FixedData(traj_group, name)
+            return FixedData(group, name)
         else:
             raise Exception('name does not provide H5MD data')
     else:
         if time:
-            return TimeData(traj_group, name, shape, dtype, data)
+            return TimeData(group, name, shape, dtype, data)
         else:
-            return FixedData(traj_group, name, shape, dtype, data)
+            return FixedData(group, name, shape, dtype, data)
 
 class TrajectoryGroup(h5py.Group):
     """Represents a trajectory group within a H5MD file."""
