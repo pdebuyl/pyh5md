@@ -26,4 +26,4 @@ Once pyh5md is installed:
     cd examples
     python random_walk_1d.py
 
-executes an example program that generates the H5MD file ``walk_1d.
+executes an example program that generates the H5MD file `walk_1d`.
