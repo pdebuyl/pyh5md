@@ -10,3 +10,20 @@ depends on [h5py](http://h5py.alfven.org/) to access HDF5 files.
 
 pyh5md is developped by Pierre de Buyl and is released under the modified BSD
 license that can be found in the file LICENSE.
+
+Install
+-------
+
+    python setup.py install --user
+
+installs pyh5md for the current user
+
+Examples
+--------
+
+Once pyh5md is installed:
+
+    cd examples
+    python random_walk_1d.py
+
+executes an example program that generates the H5MD file ``walk_1d.
