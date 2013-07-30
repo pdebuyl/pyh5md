@@ -158,7 +158,6 @@ class H5MD_File(object):
             for key in ['creator', 'author', 'creator_version']:
                 self.f['h5md'].attrs[key] = kwargs[key]
             self.f['h5md'].attrs['version'] = np.array([1,0])
-            self.f['h5md'].attrs['creation_time'] = int(time.time())
 
     def close(self):
         """Closes the HDF5 file."""
@@ -178,7 +177,7 @@ class H5MD_File(object):
     def check(self):
         """Checks the file conformance."""
         # Checks the presence of the global attributes.
-        attrs = set(['author', 'creator', 'creator_version', 'creation_time', 'version'])
+        attrs = set(['author', 'creator', 'creator_version', 'version'])
         assert(attrs <= set(self.f['h5md'].attrs.keys()))
         # Check that version is of appropriate shape.
         assert(self.f['h5md'].attrs['version'].shape==(2,))
