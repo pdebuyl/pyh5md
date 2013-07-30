@@ -15,7 +15,7 @@ f = pyh5md.H5MD_File('walk_1d.h5', 'w', creator='pyh5md examples/jump_process.py
 part = f.particles_group('particles')
 
 # Create the trajectory data
-r = np.zeros((10,1), dtype=np.int32)
+r = np.zeros((30,1), dtype=np.int32)
 
 # Add the trajectory position data element in the trajectory group
 part_pos = part.trajectory('position', r.shape, r.dtype)
@@ -26,7 +26,7 @@ obs_com = f.observable('center_of_mass', (1,), np.float64)
 # Run a simulation
 step=0
 time=0.
-for i in range(100):
+for i in range(800):
     step+=1
     time+=.1
     r += -1 + 2*np.random.random_integers(0,1,r.shape)
