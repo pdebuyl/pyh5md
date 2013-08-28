@@ -1,4 +1,5 @@
 # Copyright 2012-2013 Pierre de Buyl
+# Copyright 2013 Felix Hoëfling
 #
 # This file is part of pyh5md
 #
