@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2012-2013 Pierre de Buyl
 # Copyright 2013 Felix Hoëfling
 #
