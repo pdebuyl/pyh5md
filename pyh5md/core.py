@@ -138,6 +138,23 @@ class ParticlesGroup(h5py.Group):
     def trajectory(self, name, shape=None, dtype=None, data=None, time=True):
         """Returns data as a TimeData or FixedData object."""
         return particle_data(self, name, shape, dtype, data, time=True)
+    def set_box(self, d, boundary, edges=None, offset=None, time=False):
+        """Creates a box in the particles group. Returns the box group."""
+        if time is not False:
+            raise NotImplementedError('Time dependent box not implemented yet')
+        assert(len(boundary)==d)
+        box = self.create_group('box')
+        box.attrs['dimension'] = d
+        for b in boundary:
+            assert(b in ['none', 'periodic'])
+        box.attrs['boundary'] = boundary
+        if edges is not None:
+            assert(len(edges)==d)
+            box.attrs['edges'] = edges
+        if offset is not None:
+            assert(len(offset)==d)
+            box.attrs['offset'] = offset
+        return box
 
 
 class H5MD_File(object):
