@@ -156,10 +156,15 @@ class H5MD_File(object):
                     return
         self.f = h5py.File(filename, mode)
         if mode=='w':
-            self.f.create_group('h5md')
-            for key in ['creator', 'author', 'creator_version']:
-                self.f['h5md'].attrs[key] = kwargs[key]
-            self.f['h5md'].attrs['version'] = np.array([1,0])
+            h5md_group = self.f.create_group('h5md')
+            h5md_group.attrs['version'] = np.array([1,0])
+            author_group = h5md_group.create_group('author')
+            author_group.attrs['name'] = kwargs['author']
+            if 'author_email' in kwargs:
+                author_group.attrs['email'] = kwargs['author_email']
+            creator_group = h5md_group.create_group('creator')
+            creator_group.attrs['name'] = kwargs['creator']
+            creator_group.attrs['version'] = kwargs['creator_version']
 
     def close(self):
         """Closes the HDF5 file."""
@@ -179,8 +184,9 @@ class H5MD_File(object):
     def check(self):
         """Checks the file conformance."""
         # Checks the presence of the global attributes.
-        attrs = set(['author', 'creator', 'creator_version', 'version'])
-        assert(attrs <= set(self.f['h5md'].attrs.keys()))
+        assert(set(['version']) <= set(self.f['h5md'].attrs.keys()))
+        assert(set(['name']) <= set(self.f['h5md/author'].attrs.keys()))
+        assert(set(['name','version']) <= set(self.f['h5md/creator'].attrs.keys()))
         # Check that version is of appropriate shape.
         assert(self.f['h5md'].attrs['version'].shape==(2,))
         w = Walker(self.f)
