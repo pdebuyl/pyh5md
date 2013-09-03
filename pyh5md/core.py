@@ -16,9 +16,9 @@ H5MD_SET = frozenset(['step', 'time', 'value'])
 
 def populate_H5MD_data(g, name, shape, dtype, chunks=None):
     """Creates a step,time,value H5MD data group."""
-    g.s = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
-    g.t = g.create_dataset('time', shape=(0,), dtype=np.float64, maxshape=(None,))
-    g.v = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,)+shape, chunks=chunks)
+    g.step = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
+    g.time = g.create_dataset('time', shape=(0,), dtype=np.float64, maxshape=(None,))
+    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,)+shape, chunks=chunks)
 
 def is_h5md(g):
     """Check whether a group is a well-defined H5MD time-dependent group. Raises
