@@ -14,11 +14,15 @@ import time
 TRAJECTORY_NAMES = ['position', 'velocity', 'force', 'species']
 H5MD_SET = frozenset(['step', 'time', 'value'])
 
-def populate_H5MD_data(g, name, shape, dtype, chunks=None):
+def populate_H5MD_data(g, name, shape, dtype, chunks=None, N_fixed=True):
     """Creates a step,time,value H5MD data group."""
     g.step = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
     g.time = g.create_dataset('time', shape=(0,), dtype=np.float64, maxshape=(None,))
-    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,)+shape, chunks=chunks)
+    if N_fixed:
+        maxshape=(None,)+shape
+    else:
+        maxshape=(None,)*(1+len(shape))
+    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=maxshape, chunks=chunks)
 
 def is_h5md(g):
     """Check whether a group is a well-defined H5MD time-dependent group. Raises
@@ -62,7 +66,7 @@ class Walker(object):
 
 class TimeData(h5py.Group):
     """Represents time-dependent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None, N_fixed=True):
         """Create a new TimeData object."""
         if name in parent.keys():
             self._id = h5py.h5g.open(parent.id, name)
@@ -75,10 +79,10 @@ class TimeData(h5py.Group):
                     raise Exception('Overspecification')
                 else:
                     self._id = h5py.h5g.create(parent.id, name)
-                    populate_H5MD_data(self, name, data.shape, data.dtype, chunks=chunks)
+                    populate_H5MD_data(self, name, data.shape, data.dtype, chunks=chunks, N_fixed=N_fixed)
             else:
                 self._id = h5py.h5g.create(parent.id, name)
-                populate_H5MD_data(self, name, shape, dtype, chunks=chunks)
+                populate_H5MD_data(self, name, shape, dtype, chunks=chunks, N_fixed=N_fixed)
 
     def append(self, data, step, time):
         """Appends a time slice to the data group."""
@@ -104,7 +108,7 @@ class FixedData(h5py.Dataset):
             parent.create_dataset(name, shape, dtype)
         self._id = h5py.h5d.open(parent.id, name)
 
-def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None):
+def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None, N_fixed=True):
     """Returns particles data as a FixedData or TimeData."""
     if name is None:
         raise Exception('No name provided')
@@ -120,7 +124,7 @@ def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True
             raise Exception('name does not provide H5MD data')
     else:
         if time:
-            return TimeData(group, name, shape, dtype, data, chunks=chunks)
+            return TimeData(group, name, shape, dtype, data, chunks=chunks, N_fixed=N_fixed)
         else:
             return FixedData(group, name, shape, dtype, data)
 
@@ -135,9 +139,9 @@ class ParticlesGroup(h5py.Group):
             self._id = h5py.h5g.open(p.id, name)
         else:
             self._id = h5py.h5g.create(p.id, name)
-    def trajectory(self, name, shape=None, dtype=None, data=None, time=True, chunks=None):
+    def trajectory(self, name, shape=None, dtype=None, data=None, time=True, chunks=None, N_fixed=True):
         """Returns data as a TimeData or FixedData object."""
-        return particle_data(self, name, shape, dtype, data, time=True, chunks=chunks)
+        return particle_data(self, name, shape, dtype, data, time=True, chunks=chunks, N_fixed=N_fixed)
     def set_box(self, d, boundary, edges=None, offset=None, time=False):
         """Creates a box in the particles group. Returns the box group."""
         if time is not False:
