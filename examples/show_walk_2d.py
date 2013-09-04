@@ -18,6 +18,8 @@ idid = t.trajectory('id')
 #     plt.plot(r.step[:], r.value[:,j,:])
 
 plt.figure()
+ax1 = plt.subplot(211)
+ax2 = plt.subplot(212)
 all_id = set(idid.value[:].ravel().tolist())
 all_id.discard(-1)
 for j in all_id:
@@ -26,7 +28,8 @@ for j in all_id:
         #print j, k, mask
         if mask.sum()>1:
             print "found", j, "in", k
-            plt.plot(r.step[mask], r.value[mask,k,:], label=str(j))
+            ax1.plot(r.step[mask], r.value[mask,k,0], label=str(j))
+            ax2.plot(r.step[mask], r.value[mask,k,1], label=str(j))
 plt.legend()
 
 plt.figure()

@@ -29,7 +29,7 @@ idid = np.arange(N)
 
 # Add the trajectory position data element in the trajectory group
 part_pos = part.trajectory('position', r.shape, r.dtype, chunks=(10,N,2), N_fixed=False)
-part_id = part.trajectory('id', idid.shape, idid.dtype, chunks=(10,N), N_fixed=False)
+part_id = part.trajectory('id', idid.shape, idid.dtype, chunks=(10,N), N_fixed=False, fillvalue=-1)
 
 # Available slots for particle data
 slots = []
@@ -37,7 +37,7 @@ max_id = idid.max()
 
 # Run a simulation
 step=0
-for i_time in range(100):
+for i_time in range(200):
     step+=1
     for j in range(r.shape[0]):
         # bypass empty slots
@@ -52,8 +52,9 @@ for i_time in range(100):
         print "Exiting because of idid.max()<0"
         #break
     # Insert probalistically new particles
-    if np.random.rand() > 0.95:
+    if np.random.rand() > 0.9:
         if (len(slots)>1):
+            slots.sort()
             j = slots.pop(0)
         else:
             new_N = part_id.value.shape[1]+part_id.value.chunks[1]
@@ -73,16 +74,17 @@ for i_time in range(100):
             part_id.value.resize( (shape[0], new_N) )
             part_id.value[:,idid_shape[0]:] = -1
             j = shape[1]
+            for k in range(idid_shape[0]+1,idid.shape[0]):
+                slots.append(k)
         print "new slot", j
         max_id+=1
         idid[j] = max_id
         r[j] = [16,16]
     # Append the current position data to the H5MD file.
-    part_pos.append(r, step, step*1.0)
-    part_id.append(idid, step, step*1.0)
-    print i_time, step, idid.shape, part_id.value.shape, idid.dtype, part_id.value.dtype, r.dtype, part_pos.value.dtype
-
-print slots
+    mask = idid>=0
+    part_pos.append(r, step, step*1.0, mask=mask)
+    part_id.append(idid, step, step*1.0, mask=mask)
+    print slots
 
 # Close the file
 f.close()
