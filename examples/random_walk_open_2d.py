@@ -72,7 +72,6 @@ for i_time in range(200):
             part_pos.value.resize( (shape[0], new_N, shape[2]) )
             shape = part_id.value.shape
             part_id.value.resize( (shape[0], new_N) )
-            part_id.value[:,idid_shape[0]:] = -1
             j = shape[1]
             for k in range(idid_shape[0]+1,idid.shape[0]):
                 slots.append(k)
