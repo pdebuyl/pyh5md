@@ -87,7 +87,7 @@ class TimeData(h5py.Group):
                 self._id = h5py.h5g.create(parent.id, name)
                 populate_H5MD_data(self, name, shape, dtype, chunks=chunks, N_fixed=N_fixed, fillvalue=fillvalue)
 
-    def append(self, data, step, time):
+    def append(self, data, step, time, mask=None):
         """Appends a time slice to the data group."""
         s = self['step']
         t = self['time']
@@ -95,14 +95,25 @@ class TimeData(h5py.Group):
         if not isinstance(data, np.ndarray):
             data = np.array(data, ndmin=1)
         assert s.shape[0]==t.shape[0] and t.shape[0]==v.shape[0]
-        if data.shape==v.shape[1:] and data.dtype==v.dtype:
+        if mask is not None:
             idx = v.shape[0]
             v.resize(idx+1,axis=0)
-            v[-1] = data
+            v[-1,mask,...] = data[mask]
             s.resize(idx+1, axis=0)
             s[-1] = step
             t.resize(idx+1, axis=0)
             t[-1] = time
+        else:
+            if data.shape==v.shape[1:] and data.dtype==v.dtype:
+                idx = v.shape[0]
+                v.resize(idx+1,axis=0)
+                v[-1] = data
+                s.resize(idx+1, axis=0)
+                s[-1] = step
+                t.resize(idx+1, axis=0)
+                t[-1] = time
+            else:
+                print "pyh5md> not writing data: shape or dtype."
 
 class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
