@@ -187,6 +187,13 @@ class H5MD_File(object):
         """Closes the HDF5 file."""
         self.f.close()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False
+
     def particles_group(self, group_name):
         """Adds or open a group in /particles. If /particles does not exist,
         it will be created."""
