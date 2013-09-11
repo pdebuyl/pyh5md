@@ -5,6 +5,9 @@ Copyright 2012-2013 Pierre de Buyl
 Additional contributions
 ------------------------
 
+Konrad Hinsen:
+* 2013: use of H5MD_File as context manager
+
 Felix Höfling
 * 2013: improvement of random_walk_1d example
 * 2013: H5MD compliance patch
