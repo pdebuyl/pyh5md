@@ -12,6 +12,8 @@ import numpy as np
 import h5py
 import time
 
+from pyh5md.utils import create_compact_dataset
+
 TRAJECTORY_NAMES = ['position', 'velocity', 'force', 'species']
 H5MD_SET = frozenset(['step', 'time', 'value'])
 
@@ -151,10 +153,11 @@ class ParticlesGroup(h5py.Group):
         box.attrs['boundary'] = boundary
         if edges is not None:
             assert(len(edges)==d)
-            box.attrs['edges'] = edges
+            create_compact_dataset(box, 'edges', data=edges)
         if offset is not None:
             assert(len(offset)==d)
             box.attrs['offset'] = offset
+            create_compact_dataset(box, 'offset', data=offset)
         return box
 
 
