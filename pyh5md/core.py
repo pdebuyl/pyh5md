@@ -65,7 +65,7 @@ class Walker(object):
 
 class TimeData(h5py.Group):
     """Represents time-dependent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None, unit=None, time_unit = None):
         """Create a new TimeData object."""
         if name in parent.keys():
             self._id = h5py.h5g.open(parent.id, name)
@@ -82,6 +82,10 @@ class TimeData(h5py.Group):
             else:
                 self._id = h5py.h5g.create(parent.id, name)
                 populate_H5MD_data(self, name, shape, dtype, chunks=chunks)
+            if unit is not None:
+                self['value'].attrs['unit'] = unit
+            if time_unit is not None:
+                self['time'].attrs['unit'] = time_unit
 
     def append(self, data, step, time):
         """Appends a time slice to the data group."""
@@ -102,12 +106,14 @@ class TimeData(h5py.Group):
 
 class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None, data=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None):
         if name not in parent.keys():
             parent.create_dataset(name, shape, dtype)
         self._id = h5py.h5d.open(parent.id, name)
+        if unit is not None:
+            self.attrs['unit'] = unit
 
-def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None):
+def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit=None):
     """Returns particles data as a FixedData or TimeData."""
     if name is None:
         raise Exception('No name provided')
@@ -123,9 +129,9 @@ def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True
             raise Exception('name does not provide H5MD data')
     else:
         if time:
-            return TimeData(group, name, shape, dtype, data, chunks=chunks)
+            return TimeData(group, name, shape, dtype, data, chunks=chunks, unit=unit, time_unit=time_unit)
         else:
-            return FixedData(group, name, shape, dtype, data)
+            return FixedData(group, name, shape, dtype, data, unit=unit)
 
 class ParticlesGroup(h5py.Group):
     """Represents a particles group within a H5MD file."""
@@ -138,10 +144,11 @@ class ParticlesGroup(h5py.Group):
             self._id = h5py.h5g.open(p.id, name)
         else:
             self._id = h5py.h5g.create(p.id, name)
-    def trajectory(self, name, shape=None, dtype=None, data=None, time=True, chunks=None):
+    def trajectory(self, name, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit=None):
         """Returns data as a TimeData or FixedData object."""
-        return particle_data(self, name, shape, dtype, data, time=True, chunks=chunks)
-    def set_box(self, d, boundary, edges=None, offset=None, time=False):
+        return particle_data(self, name, shape, dtype, data, time=True, chunks=chunks, unit=unit, time_unit=time_unit)
+    def set_box(self, d, boundary, edges=None, offset=None, time=False,
+                unit=None):
         """Creates a box in the particles group. Returns the box group."""
         if time is not False:
             raise NotImplementedError('Time dependent box not implemented yet')
@@ -153,11 +160,17 @@ class ParticlesGroup(h5py.Group):
         box.attrs['boundary'] = boundary
         if edges is not None:
             assert(len(edges)==d)
-            create_compact_dataset(box, 'edges', data=edges)
+            ds = create_compact_dataset(box, 'edges', data=edges)
+            if unit is not None:
+                assert isinstance(unit, str)
+                ds.attrs['unit'] = unit
         if offset is not None:
             assert(len(offset)==d)
             box.attrs['offset'] = offset
-            create_compact_dataset(box, 'offset', data=offset)
+            ds = create_compact_dataset(box, 'offset', data=offset)
+            if unit is not None:
+                assert isinstance(unit, str)
+                ds.attrs['unit'] = unit
         return box
 
 
