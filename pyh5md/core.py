@@ -89,16 +89,16 @@ class TimeData(h5py.Group):
         t = self['time']
         v = self['value']
         if not isinstance(data, np.ndarray):
-            data = np.array(data, ndmin=1)
+            data = np.array(data, ndmin=0, dtype=v.dtype)
         assert s.shape[0]==t.shape[0] and t.shape[0]==v.shape[0]
-        if data.shape==v.shape[1:] and data.dtype==v.dtype:
-            idx = v.shape[0]
-            v.resize(idx+1,axis=0)
-            v[-1] = data
-            s.resize(idx+1, axis=0)
-            s[-1] = step
-            t.resize(idx+1, axis=0)
-            t[-1] = time
+        assert data.shape==v.shape[1:]
+        idx = v.shape[0]
+        v.resize(idx+1,axis=0)
+        v[-1] = data
+        s.resize(idx+1, axis=0)
+        s[-1] = step
+        t.resize(idx+1, axis=0)
+        t[-1] = time
 
 class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
