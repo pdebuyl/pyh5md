@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright 2013 Pierre de Buyl
+# Copyright 2013 Konrad Hinsen
 #
 # This file is part of pyh5md
 #
@@ -12,6 +13,7 @@
 import numpy
 
 import h5py
+import h5py.version
 from h5py import h5s, h5t, h5r, h5d
 from h5py._hl import dataset
 from h5py._hl.base import HLObject, py3
@@ -73,8 +75,14 @@ def create_compact_dataset(loc, name, shape=None, dtype=None, data=None,
         compression_opts = compression
         compression = 'gzip'
 
-    dcpl = filters.generate_dcpl(shape, dtype, chunks, compression, compression_opts,
-                  shuffle, fletcher32, maxshape)
+    if h5py.version.version_tuple >= (2, 2, 0, ''):
+        dcpl = filters.generate_dcpl(shape, dtype, chunks, compression,
+                                     compression_opts, shuffle, fletcher32,
+                                     maxshape, None)
+    else:
+        dcpl = filters.generate_dcpl(shape, dtype, chunks, compression,
+                                     compression_opts, shuffle, fletcher32,
+                                     maxshape)
 
     if fillvalue is not None:
         fillvalue = numpy.array(fillvalue)
