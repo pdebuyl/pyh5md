@@ -180,14 +180,12 @@ class H5MD_File(object):
         """Create or read an H5MD file, according to argument mode.
         mode should be 'r', 'r+' or 'w'"""
         if mode not in ['r','r+','w']:
-            print 'Unknown mode in H5MDFile'
-            return
+            raise ValueError('unknown mode "%s" in H5MD_File' % mode)
         if mode=='w':
             kw = kwargs.keys()
             for key in ['creator', 'author', 'creator_version']:
                 if key not in kw:
-                    print 'missing arguments in H5MDFile'
-                    return
+                    raise ValueError('missing argument "%s" in H5MDFile' % key)
         self.f = h5py.File(filename, mode)
         if mode=='w':
             h5md_group = self.f.create_group('h5md')
