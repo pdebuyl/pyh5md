@@ -7,6 +7,8 @@ Additional contributions
 
 Konrad Hinsen:
 * 2013: use of H5MD_File as context manager
+* 2013: general programming improvements
+* 2013: Addition of units
 
 Felix Höfling
 * 2013: improvement of random_walk_1d example
