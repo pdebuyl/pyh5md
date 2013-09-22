@@ -10,8 +10,6 @@ import pyh5md
 from pyh5md.core import is_h5md
 import h5py
 
-f = pyh5md.H5MD_File('particles_3d.h5', 'r')
+with pyh5md.H5MD_File('particles_3d.h5', 'r') as f:
+    f.check()
 
-f.check()
-
-f.close()

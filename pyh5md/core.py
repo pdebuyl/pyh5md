@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright 2012-2013 Pierre de Buyl
 # Copyright 2013 Felix Hoëfling
+# Copyright 2013 Konrad Hinsen
 #
 # This file is part of pyh5md
 #
@@ -10,6 +11,8 @@
 import numpy as np
 import h5py
 import time
+
+from pyh5md.utils import create_compact_dataset
 
 TRAJECTORY_NAMES = ['position', 'velocity', 'force', 'species']
 H5MD_SET = frozenset(['step', 'time', 'value'])
@@ -69,7 +72,7 @@ class Walker(object):
 
 class TimeData(h5py.Group):
     """Represents time-dependent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None, N_fixed=True, fillvalue=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None, unit=None, time_unit = None, N_fixed=True, fillvalue=None):
         """Create a new TimeData object."""
         if name in parent.keys():
             self._id = h5py.h5g.open(parent.id, name)
@@ -86,6 +89,10 @@ class TimeData(h5py.Group):
             else:
                 self._id = h5py.h5g.create(parent.id, name)
                 populate_H5MD_data(self, name, shape, dtype, chunks=chunks, N_fixed=N_fixed, fillvalue=fillvalue)
+            if unit is not None:
+                self['value'].attrs['unit'] = unit
+            if time_unit is not None:
+                self['time'].attrs['unit'] = time_unit
 
     def append(self, data, step, time, mask=None):
         """Appends a time slice to the data group."""
@@ -93,7 +100,7 @@ class TimeData(h5py.Group):
         t = self['time']
         v = self['value']
         if not isinstance(data, np.ndarray):
-            data = np.array(data, ndmin=1)
+            data = np.array(data, ndmin=0, dtype=v.dtype)
         assert s.shape[0]==t.shape[0] and t.shape[0]==v.shape[0]
         if mask is not None:
             idx = v.shape[0]
@@ -104,25 +111,25 @@ class TimeData(h5py.Group):
             t.resize(idx+1, axis=0)
             t[-1] = time
         else:
-            if data.shape==v.shape[1:] and data.dtype==v.dtype:
-                idx = v.shape[0]
-                v.resize(idx+1,axis=0)
-                v[-1] = data
-                s.resize(idx+1, axis=0)
-                s[-1] = step
-                t.resize(idx+1, axis=0)
-                t[-1] = time
-            else:
-                print "pyh5md> not writing data: shape or dtype."
+            assert data.shape==v.shape[1:]
+            idx = v.shape[0]
+            v.resize(idx+1,axis=0)
+            v[-1] = data
+            s.resize(idx+1, axis=0)
+            s[-1] = step
+            t.resize(idx+1, axis=0)
+            t[-1] = time
 
 class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None, data=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None):
         if name not in parent.keys():
             parent.create_dataset(name, shape, dtype)
         self._id = h5py.h5d.open(parent.id, name)
+        if unit is not None:
+            self.attrs['unit'] = unit
 
-def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None, N_fixed=True, fillvalue=None):
+def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit=None, N_fixed=True, fillvalue=None):
     """Returns particles data as a FixedData or TimeData."""
     if name is None:
         raise Exception('No name provided')
@@ -138,9 +145,9 @@ def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True
             raise Exception('name does not provide H5MD data')
     else:
         if time:
-            return TimeData(group, name, shape, dtype, data, chunks=chunks, N_fixed=N_fixed, fillvalue=fillvalue)
+            return TimeData(group, name, shape, dtype, data, chunks=chunks, unit=unit, time_unit=time_unit, N_fixed=N_fixed, fillvalue=fillvalue)
         else:
-            return FixedData(group, name, shape, dtype, data)
+            return FixedData(group, name, shape, dtype, data, unit=unit)
 
 class ParticlesGroup(h5py.Group):
     """Represents a particles group within a H5MD file."""
@@ -153,10 +160,14 @@ class ParticlesGroup(h5py.Group):
             self._id = h5py.h5g.open(p.id, name)
         else:
             self._id = h5py.h5g.create(p.id, name)
-    def trajectory(self, name, shape=None, dtype=None, data=None, time=True, chunks=None, N_fixed=True, fillvalue=None):
+    def trajectory(self, name, shape=None, dtype=None, data=None, time=True,
+                   chunks=None, unit=None, time_unit=None, N_fixed=True, fillvalue=None):
         """Returns data as a TimeData or FixedData object."""
-        return particle_data(self, name, shape, dtype, data, time=True, chunks=chunks, N_fixed=N_fixed, fillvalue=fillvalue)
-    def set_box(self, d, boundary, edges=None, offset=None, time=False):
+        return particle_data(self, name, shape, dtype, data, time=True,
+                             chunks=chunks, unit=unit, time_unit=time_unit, N_fixed=N_fixed,
+                             fillvalue=fillvalue)
+    def set_box(self, d, boundary, edges=None, offset=None, time=False,
+                unit=None):
         """Creates a box in the particles group. Returns the box group."""
         if time is not False:
             raise NotImplementedError('Time dependent box not implemented yet')
@@ -168,10 +179,17 @@ class ParticlesGroup(h5py.Group):
         box.attrs['boundary'] = boundary
         if edges is not None:
             assert(len(edges)==d)
-            box.attrs['edges'] = edges
+            ds = create_compact_dataset(box, 'edges', data=edges)
+            if unit is not None:
+                assert isinstance(unit, str)
+                ds.attrs['unit'] = unit
         if offset is not None:
             assert(len(offset)==d)
             box.attrs['offset'] = offset
+            ds = create_compact_dataset(box, 'offset', data=offset)
+            if unit is not None:
+                assert isinstance(unit, str)
+                ds.attrs['unit'] = unit
         return box
 
 
@@ -181,14 +199,12 @@ class H5MD_File(object):
         """Create or read an H5MD file, according to argument mode.
         mode should be 'r', 'r+' or 'w'"""
         if mode not in ['r','r+','w']:
-            print 'Unknown mode in H5MDFile'
-            return
+            raise ValueError('unknown mode "%s" in H5MD_File' % mode)
         if mode=='w':
             kw = kwargs.keys()
             for key in ['creator', 'author', 'creator_version']:
                 if key not in kw:
-                    print 'missing arguments in H5MDFile'
-                    return
+                    raise ValueError('missing argument "%s" in H5MDFile' % key)
         self.f = h5py.File(filename, mode)
         if mode=='w':
             h5md_group = self.f.create_group('h5md')
@@ -204,6 +220,13 @@ class H5MD_File(object):
     def close(self):
         """Closes the HDF5 file."""
         self.f.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False
 
     def particles_group(self, group_name):
         """Adds or open a group in /particles. If /particles does not exist,

@@ -20,7 +20,7 @@ f = pyh5md.H5MD_File('walk_2d.h5', 'w', creator='pyh5md examples/random_walk_ope
 part = f.particles_group('tracers')
 offset = np.array( [0, 0] )
 edges = np.array( [NX, NY] )
-part.set_box(d=2, boundary=['none', 'none'], edges = edges, offset=offset)
+part.set_box(d=2, boundary=['none', 'none'], edges = edges, offset=offset, unit='m')
 
 # Create the trajectory data
 r = np.zeros((N,2), dtype=np.int32)
@@ -28,7 +28,7 @@ r[:,:] = 16
 idid = np.arange(N)
 
 # Add the trajectory position data element in the trajectory group
-part_pos = part.trajectory('position', r.shape, r.dtype, chunks=(10,N,2), N_fixed=False)
+part_pos = part.trajectory('position', r.shape, r.dtype, chunks=(10,N,2), N_fixed=False, unit='m', time_unit='s')
 part_id = part.trajectory('id', idid.shape, idid.dtype, chunks=(10,N), N_fixed=False, fillvalue=-1)
 
 # Available slots for particle data
@@ -47,10 +47,9 @@ for i_time in range(200):
             if ( r[j,0]<0 or r[j,0]>NX or r[j,1]<0 or r[j,1]>NY ):
                 idid[j] = -1
                 slots.append(j)
-                print "emptying slot", j
+                print "emptying slot", j,
     if idid.max()<0:
-        print "Exiting because of idid.max()<0"
-        #break
+        raise ValueError('Exiting because of idid.max()<0')
     # Insert probalistically new particles
     if np.random.rand() > 0.9:
         if (len(slots)>1):
@@ -75,7 +74,7 @@ for i_time in range(200):
             j = shape[1]
             for k in range(idid_shape[0]+1,idid.shape[0]):
                 slots.append(k)
-        print "new slot", j
+        print "new slot", j,
         max_id+=1
         idid[j] = max_id
         r[j] = [16,16]
@@ -83,7 +82,7 @@ for i_time in range(200):
     mask = idid>=0
     part_pos.append(r, step, step*1.0, mask=mask)
     part_id.append(idid, step, step*1.0, mask=mask)
-    print slots
+    print slots,
 
 # Close the file
 f.close()

@@ -24,7 +24,7 @@ r = np.zeros((30,1), dtype=np.int32)
 part_pos = part.trajectory('position', r.shape, r.dtype)
 
 # Create an observable
-obs_com = f.observable('center_of_mass', (1,), np.float64)
+obs_com = f.observable('center_of_mass', (), np.float64)
 
 # Run a simulation
 step=0
