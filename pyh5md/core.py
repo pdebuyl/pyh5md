@@ -17,6 +17,8 @@ from pyh5md.utils import create_compact_dataset
 TRAJECTORY_NAMES = ['position', 'velocity', 'force', 'species']
 H5MD_SET = frozenset(['step', 'time', 'value'])
 
+VL_STR = h5py.special_dtype(vlen=str)
+
 def populate_H5MD_data(g, name, shape, dtype, chunks=None):
     """Creates a step,time,value H5MD data group."""
     g.step = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
@@ -83,9 +85,9 @@ class TimeData(h5py.Group):
                 self._id = h5py.h5g.create(parent.id, name)
                 populate_H5MD_data(self, name, shape, dtype, chunks=chunks)
             if unit is not None:
-                self['value'].attrs['unit'] = unit
+                self['value'].attrs.create('unit',data=unit,dtype=VL_STR)
             if time_unit is not None:
-                self['time'].attrs['unit'] = time_unit
+                self['time'].attrs.create('unit',data=time_unit,dtype=VL_STR)
 
     def append(self, data, step, time):
         """Appends a time slice to the data group."""
@@ -111,7 +113,7 @@ class FixedData(h5py.Dataset):
             parent.create_dataset(name, shape, dtype)
         self._id = h5py.h5d.open(parent.id, name)
         if unit is not None:
-            self.attrs['unit'] = unit
+            self.attrs.create('unit',data=unit,dtype=VL_STR)
 
 def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit=None):
     """Returns particles data as a FixedData or TimeData."""
@@ -157,20 +159,20 @@ class ParticlesGroup(h5py.Group):
         box.attrs['dimension'] = d
         for b in boundary:
             assert(b in ['none', 'periodic'])
-        box.attrs['boundary'] = boundary
+        box.attrs.create('boundary', data=boundary, dtype=VL_STR)
         if edges is not None:
             assert(len(edges)==d)
             ds = create_compact_dataset(box, 'edges', data=edges)
             if unit is not None:
                 assert isinstance(unit, str)
-                ds.attrs['unit'] = unit
+                ds.attrs.create('unit', data=unit, dtype=VL_STR)
         if offset is not None:
             assert(len(offset)==d)
             box.attrs['offset'] = offset
             ds = create_compact_dataset(box, 'offset', data=offset)
             if unit is not None:
                 assert isinstance(unit, str)
-                ds.attrs['unit'] = unit
+                ds.attrs.create('unit', data=unit, dtype=VL_STR)
         return box
 
 
@@ -191,12 +193,12 @@ class H5MD_File(object):
             h5md_group = self.f.create_group('h5md')
             h5md_group.attrs['version'] = np.array([1,0])
             author_group = h5md_group.create_group('author')
-            author_group.attrs['name'] = kwargs['author']
+            author_group.attrs.create('name', data=kwargs['author'], dtype=VL_STR)
             if 'author_email' in kwargs:
-                author_group.attrs['email'] = kwargs['author_email']
+                author_group.attrs.create('email', data=kwargs['author_email'], dtype=VL_STR)
             creator_group = h5md_group.create_group('creator')
-            creator_group.attrs['name'] = kwargs['creator']
-            creator_group.attrs['version'] = kwargs['creator_version']
+            creator_group.attrs.create('name', data=kwargs['creator'], dtype=VL_STR)
+            creator_group.attrs.create('version', data=kwargs['creator_version'], dtype=VL_STR)
 
     def close(self):
         """Closes the HDF5 file."""
