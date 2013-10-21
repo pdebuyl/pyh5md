@@ -150,29 +150,38 @@ class ParticlesGroup(h5py.Group):
         """Returns data as a TimeData or FixedData object."""
         return particle_data(self, name, shape, dtype, data, time=True, chunks=chunks, unit=unit, time_unit=time_unit)
     def set_box(self, d, boundary, edges=None, offset=None, time=False,
-                unit=None):
+                unit=None, time_unit=None):
         """Creates a box in the particles group. Returns the box group."""
-        if time is not False:
-            raise NotImplementedError('Time dependent box not implemented yet')
         assert(len(boundary)==d)
-        box = self.create_group('box')
-        box.attrs['dimension'] = d
         for b in boundary:
             assert(b in ['none', 'periodic'])
+        box = self.create_group('box')
+        box.attrs['dimension'] = d
         box.attrs.create('boundary', data=boundary, dtype=VL_STR)
-        if edges is not None:
-            assert(len(edges)==d)
-            ds = create_compact_dataset(box, 'edges', data=edges)
-            if unit is not None:
-                assert isinstance(unit, str)
-                ds.attrs.create('unit', data=unit, dtype=VL_STR)
-        if offset is not None:
-            assert(len(offset)==d)
-            box.attrs['offset'] = offset
-            ds = create_compact_dataset(box, 'offset', data=offset)
-            if unit is not None:
-                assert isinstance(unit, str)
-                ds.attrs.create('unit', data=unit, dtype=VL_STR)
+        if (edges is None) or (offset is None):
+            if not all([b=='none' for b in boundary]):
+                raise ValueError("Not all boundary elements are 'none' though edges or offset is missing in set_box.")
+        if time is not False:
+            if edges is not None:
+                assert(len(edges)==d)
+                box.edges = TimeData(box, 'edges', data=np.asarray(edges), unit=unit, time_unit=time_unit)
+            if offset is not None:
+                assert(len(offset)==d)
+                box.offset = TimeData(box, 'offset', data=np.asarray(offset), unit=unit, time_unit=time_unit)
+        else:
+            if edges is not None:
+                assert(len(edges)==d)
+                ds = create_compact_dataset(box, 'edges', data=edges)
+                if unit is not None:
+                    assert isinstance(unit, str)
+                    ds.attrs.create('unit', data=unit, dtype=VL_STR)
+            if offset is not None:
+                assert(len(offset)==d)
+                box.attrs['offset'] = offset
+                ds = create_compact_dataset(box, 'offset', data=offset)
+                if unit is not None:
+                    assert isinstance(unit, str)
+                    ds.attrs.create('unit', data=unit, dtype=VL_STR)
         return box
 
 
