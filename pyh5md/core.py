@@ -225,11 +225,14 @@ class H5MD_File(object):
         it will be created."""
         return ParticlesGroup(self.f, group_name)
 
-    def observable(self, obs_name,*args,**kwargs):
+    def observable(self, obs_name, time=True, *args,**kwargs):
         """Returns observable data as a TimeData object."""
         if 'observables' not in self.f.keys():
             self.f.create_group('observables')
-        return TimeData(self.f['observables'],obs_name,*args,**kwargs)
+        if time:
+            return TimeData(self.f['observables'],obs_name,*args,**kwargs)
+        else:
+            return FixedData(self.f['observables'],obs_name,*args,**kwargs)
         
     def check(self):
         """Checks the file conformance."""
