@@ -110,7 +110,7 @@ class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
     def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None):
         if name not in parent.keys():
-            parent.create_dataset(name, shape, dtype)
+            parent.create_dataset(name, shape, dtype, data)
         self._id = h5py.h5d.open(parent.id, name)
         if unit is not None:
             self.attrs.create('unit',data=unit,dtype=VL_STR)
