@@ -111,7 +111,8 @@ class FixedData(h5py.Dataset):
     def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None):
         if name not in parent.keys():
             parent.create_dataset(name, shape, dtype, data)
-        self._id = h5py.h5d.open(parent.id, name)
+        oid = h5py.h5o.open(parent.id, name)
+        h5py.Dataset.__init__(self, oid)
         if unit is not None:
             self.attrs.create('unit',data=unit,dtype=VL_STR)
 
@@ -227,12 +228,25 @@ class H5MD_File(object):
 
     def observable(self, obs_name, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit = None):
         """Returns observable data as a TimeData object."""
-        if 'observables' not in self.f.keys():
-            self.f.create_group('observables')
-        if time:
-            return TimeData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, chunks=chunks, unit=unit, time_unit=time_unit)
+        if 'observables' in self.f.keys():
+            group = self.f['observables']
         else:
-            return FixedData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, unit=unit)
+            group = self.f.create_group('observables')
+        if obs_name in self.f['observables'].keys():
+            item = group[obs_name]
+            if type(item)==h5py.Group:
+                assert is_h5md(item)
+                return TimeData(group, obs_name)
+            elif type(item)==h5py.Dataset:
+                assert shape==dtype==data==None
+                return FixedData(group, obs_name)
+            else:
+                raise Exception('obs_name does not provide H5MD data')
+        else:
+            if time:
+                return TimeData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, chunks=chunks, unit=unit, time_unit=time_unit)
+            else:
+                return FixedData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, unit=unit)
         
     def check(self):
         """Checks the file conformance."""
