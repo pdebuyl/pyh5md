@@ -110,7 +110,7 @@ class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
     def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None):
         if name not in parent.keys():
-            parent.create_dataset(name, shape, dtype)
+            parent.create_dataset(name, shape, dtype, data)
         self._id = h5py.h5d.open(parent.id, name)
         if unit is not None:
             self.attrs.create('unit',data=unit,dtype=VL_STR)
@@ -225,11 +225,14 @@ class H5MD_File(object):
         it will be created."""
         return ParticlesGroup(self.f, group_name)
 
-    def observable(self, obs_name,*args,**kwargs):
+    def observable(self, obs_name, time=True, *args,**kwargs):
         """Returns observable data as a TimeData object."""
         if 'observables' not in self.f.keys():
             self.f.create_group('observables')
-        return TimeData(self.f['observables'],obs_name,*args,**kwargs)
+        if time:
+            return TimeData(self.f['observables'],obs_name,*args,**kwargs)
+        else:
+            return FixedData(self.f['observables'],obs_name,*args,**kwargs)
         
     def check(self):
         """Checks the file conformance."""
