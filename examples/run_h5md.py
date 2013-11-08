@@ -30,6 +30,10 @@ obs_com = f.observable('center_of_mass', r.shape[-1:], r.dtype)
 # Create a scalar time independent observable
 obs_fixed = f.observable('random_number', data=np.random.random(), time=False)
 
+edges = (1.,)
+offset = (0.,)
+box = at.set_box(d=1, boundary=['none'], edges=edges, offset=offset, time=True)
+
 DT = 0.1
 time = 0.
 for t in xrange(201):
@@ -41,5 +45,7 @@ for t in xrange(201):
     v += DT*np.random.normal(0., 1., v.shape)
     r += DT*0.5*v
     time += DT
+    box.offset.append(offset, step, time)
+    box.edges.append(edges, step, time)
 
 f.close()
