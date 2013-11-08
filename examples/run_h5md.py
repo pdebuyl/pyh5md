@@ -27,6 +27,8 @@ at_v = at.trajectory('velocity', v.shape, v.dtype)
 
 # Create an observable
 obs_com = f.observable('center_of_mass', r.shape[-1:], r.dtype)
+# Create a scalar time independent observable
+obs_fixed = f.observable('random_number', data=np.random.random(), time=False)
 
 DT = 0.1
 time = 0.
