@@ -45,7 +45,7 @@ for t in xrange(201):
     v += DT*np.random.normal(0., 1., v.shape)
     r += DT*0.5*v
     time += DT
-    box.offset.append(offset, step, time)
-    box.edges.append(edges, step, time)
+    box.offset.append(offset, t, time)
+    box.edges.append(edges, t, time)
 
 f.close()
