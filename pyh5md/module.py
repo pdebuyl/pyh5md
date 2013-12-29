@@ -23,11 +23,11 @@ class Module(object):
         g = loc.create_group(self._name)
         g.attrs['version'] = self.version
 
-def register_module(name, module_class):
+def register_module(module_class):
     """Add a module to the list of recognized H5MD modules."""
-    assert isinstance(name, basestring)
     assert issubclass(module_class, Module)
-    module_dict[name] = module_class
+    assert isinstance(module_class._name, basestring)
+    module_dict[module_class._name] = module_class
 
 class UnitsModule(Module):
     """The 'units' H5MD module."""
@@ -35,7 +35,7 @@ class UnitsModule(Module):
     def __init__(self, loc, version):
         self.known_versions = [(0,1)]
         super(UnitsModule, self).__init__(loc, version)
-register_module('units', UnitsModule)
+register_module(UnitsModule)
 
 class ThermodynamicsModule(Module):
     """The 'thermodynamics' H5MD module."""
@@ -43,4 +43,4 @@ class ThermodynamicsModule(Module):
     def __init__(self, loc, version):
         self.known_versions = [(0,1)]
         super(ThermodynamicsModule, self).__init__(loc, version)
-register_module('thermodynamics', ThermodynamicsModule)
+register_module(ThermodynamicsModule)
