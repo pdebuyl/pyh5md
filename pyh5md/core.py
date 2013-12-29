@@ -216,7 +216,10 @@ class H5MD_File(object):
                 assert isinstance(modules, dict)
                 module_group = h5md_group.create_group('modules')
                 for module_name, version in modules.items():
+                    if module_name not in module_dict:
+                        raise ValueError('Unknown module "%s"' % module_name)
                     self.modules.append(module_dict[module_name](module_group, version))
+
 
     def close(self):
         """Closes the HDF5 file."""
