@@ -209,6 +209,17 @@ class H5MD_File(object):
             creator_group = h5md_group.create_group('creator')
             creator_group.attrs.create('name', data=kwargs['creator'], dtype=VL_STR)
             creator_group.attrs.create('version', data=kwargs['creator_version'], dtype=VL_STR)
+            if 'modules' in kwargs:
+                modules = kwargs['modules']
+                assert isinstance(modules, dict)
+                module_group = h5md_group.create_group('modules')
+                for module_name, version in modules.items():
+                    assert isinstance(module_name, basestring)
+                    assert len(version) == 2
+                    assert isinstance(version[0], int)
+                    assert isinstance(version[1], int)
+                    mg = module_group.create_group(module_name)
+                    mg.attrs['version'] = np.array(version)
 
     def close(self):
         """Closes the HDF5 file."""
