@@ -13,6 +13,7 @@ import h5py
 import time
 
 from pyh5md.utils import create_compact_dataset
+from pyh5md.module import module_dict
 
 TRAJECTORY_NAMES = ['position', 'velocity', 'force', 'species']
 H5MD_SET = frozenset(['step', 'time', 'value'])
@@ -199,6 +200,7 @@ class H5MD_File(object):
                 if key not in kw:
                     raise ValueError('missing argument "%s" in H5MDFile' % key)
         self.f = h5py.File(filename, mode)
+        self.modules = []
         if mode=='w':
             h5md_group = self.f.create_group('h5md')
             h5md_group.attrs['version'] = np.array([1,0])
@@ -209,6 +211,15 @@ class H5MD_File(object):
             creator_group = h5md_group.create_group('creator')
             creator_group.attrs.create('name', data=kwargs['creator'], dtype=VL_STR)
             creator_group.attrs.create('version', data=kwargs['creator_version'], dtype=VL_STR)
+            if 'modules' in kwargs:
+                modules = kwargs['modules']
+                assert isinstance(modules, dict)
+                module_group = h5md_group.create_group('modules')
+                for module_name, version in modules.items():
+                    if module_name not in module_dict:
+                        raise ValueError('Unknown module "%s"' % module_name)
+                    self.modules.append(module_dict[module_name](module_group, version))
+
 
     def close(self):
         """Closes the HDF5 file."""
