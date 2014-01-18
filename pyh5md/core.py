@@ -15,7 +15,7 @@ import time
 from pyh5md.utils import create_compact_dataset
 from pyh5md.module import module_dict
 
-TRAJECTORY_NAMES = ['position', 'velocity', 'force', 'species']
+TRAJECTORY_NAMES = ['position', 'image', 'velocity', 'force', 'mass', 'species', 'id']
 H5MD_SET = frozenset(['step', 'time', 'value'])
 
 VL_STR = h5py.special_dtype(vlen=str)
