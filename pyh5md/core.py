@@ -221,7 +221,7 @@ class H5MD_File(object):
                     self.modules.append(module_dict[module_name](module_group, version))
         elif mode=='r':
             h5md_group = self.f['h5md']
-            if type(h5md_group) == h5py.Group:
+            if type(h5md_group) == h5py.Group and 'modules' in h5md_group.keys():
                 module_group = h5md_group['modules']
                 for module_name in module_group.keys():
                     self.modules.append(module_dict[module_name](module_group))
