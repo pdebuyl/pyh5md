@@ -150,7 +150,7 @@ class ParticlesGroup(h5py.Group):
             self._id = h5py.h5g.create(p.id, name)
     def trajectory(self, name, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit=None):
         """Returns data as a TimeData or FixedData object."""
-        return particle_data(self, name, shape, dtype, data, time=True, chunks=chunks, unit=unit, time_unit=time_unit)
+        return particle_data(self, name, shape, dtype, data, time, chunks=chunks, unit=unit, time_unit=time_unit)
     def set_box(self, d, boundary, edges=None, offset=None, time=False,
                 unit=None, time_unit=None):
         """Creates a box in the particles group. Returns the box group."""
