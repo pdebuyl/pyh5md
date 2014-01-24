@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2014 Pierre de Buyl
+# Copyright 2012-2014 Pierre de Buyl
 #
 # This file is part of pyh5md
 #
