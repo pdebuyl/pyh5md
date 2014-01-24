@@ -11,6 +11,25 @@ import h5py
 
 VL_STR = h5py.special_dtype(vlen=str)
 
+H5MD_SET = frozenset(['step', 'time', 'value'])
+
+def is_h5md(g):
+    """Check whether a group is a well-defined H5MD time-dependent group. Raises
+    an exception if a group contains the elements of H5MD_SET but does not
+    comply to an equal length for all of them."""
+    if H5MD_SET <= set(g.keys()):
+        s_d = len(g['step'].shape)
+        s_l = g['step'].shape[0]
+        t_d = len(g['time'].shape)
+        t_l = g['time'].shape[0]
+        v_l = g['value'].shape[0]
+        assert(
+            (s_d == 1) and (t_d == 1) and (s_l == t_l) and (s_l == v_l)
+            )
+        return True
+    else:
+        return False
+
 def populate_H5MD_data(g, name, shape, dtype, chunks=None):
     """Creates a step,time,value H5MD data group."""
     g.step = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))

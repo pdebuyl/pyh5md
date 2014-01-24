@@ -15,27 +15,9 @@ import time
 from pyh5md.utils import create_compact_dataset
 from pyh5md.module import module_dict
 from pyh5md.box import Box
-from pyh5md.base import VL_STR, TimeData, FixedData
+from pyh5md.base import VL_STR, TimeData, FixedData, is_h5md
 
 TRAJECTORY_NAMES = ['position', 'image', 'velocity', 'force', 'mass', 'species', 'id']
-H5MD_SET = frozenset(['step', 'time', 'value'])
-
-def is_h5md(g):
-    """Check whether a group is a well-defined H5MD time-dependent group. Raises
-    an exception if a group contains the elements of H5MD_SET but does not
-    comply to an equal length for all of them."""
-    if H5MD_SET <= set(g.keys()):
-        s_d = len(g['step'].shape)
-        s_l = g['step'].shape[0]
-        t_d = len(g['time'].shape)
-        t_l = g['time'].shape[0]
-        v_l = g['value'].shape[0]
-        assert(
-            (s_d == 1) and (t_d == 1) and (s_l == t_l) and (s_l == v_l)
-            )
-        return True
-    else:
-        return False
 
 class Walker(object):
     """Finds all HDF5 groups within a given group."""
