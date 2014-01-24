@@ -68,7 +68,10 @@ class TimeData(h5py.Group):
         if not isinstance(data, np.ndarray):
             data = np.array(data, ndmin=0, dtype=v.dtype)
         assert s.shape[0]==t.shape[0] and t.shape[0]==v.shape[0]
-        assert data.shape==v.shape[1:]
+        # Check the shape only for numpy builtin types. This avoids the
+        # misinterpretation of variable-length datasets.
+        if v.dtype.isbuiltin:
+            assert data.shape==v.shape[1:]
         idx = v.shape[0]
         v.resize(idx+1,axis=0)
         v[-1] = data
