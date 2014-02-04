@@ -7,6 +7,7 @@
 
 import numpy as np
 import pyh5md
+from pyh5md.topology import get_bond_list, TopologyGroup
 
 f = pyh5md.H5MD_File('particles_3d.h5', 'w', creator='run_h5md', creator_version='0', author='Pierre de Buyl')
 
@@ -16,6 +17,9 @@ at = f.particles_group('atoms')
 # Creating position data
 r = np.zeros((100,3), dtype=np.float64)
 at_pos = at.trajectory('position', r.shape, r.dtype)
+
+tg = TopologyGroup(f.f, 'atoms')
+bl = tg.bond_list('loose', time=True)
 
 # Creating species
 s = np.ones(r.shape[:1])
@@ -33,11 +37,14 @@ obs_fixed = f.observable('random_number', data=np.random.random(), time=False)
 edges = (1.,)
 box = at.box(dimension=1, boundary=['none'], edges=edges, time=True)
 
+bonds = [ (0, 1), (1, 2), (2, 3) ]
+
 DT = 0.1
 time = 0.
 for t in xrange(201):
     if t%10==0:
         at_pos.append(r, t, time)
+        bl.append(np.array(bonds).reshape((-1,)), t, time)
         at_v.append(v, t, time)
         obs_com.append(r.mean(axis=0), t, time)
     r += DT*0.5*v
@@ -45,5 +52,7 @@ for t in xrange(201):
     r += DT*0.5*v
     time += DT
     box.edges.append(edges, t, time)
+    if t==100:
+        bonds += [(4, 5), (5, 6), (6, 7)]
 
 f.close()

@@ -12,7 +12,6 @@ import numpy as np
 import h5py
 import time
 
-from pyh5md.utils import create_compact_dataset
 from pyh5md.module import module_dict
 from pyh5md.box import Box
 from pyh5md.base import VL_STR, TimeData, FixedData, is_h5md

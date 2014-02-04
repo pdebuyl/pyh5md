@@ -48,3 +48,10 @@ class TopologyGroup(h5py.Group):
     def bond_list(self, name, time=False, time_unit=None):
         """Returns the bond list as a TimeData of FixedData object."""
         return get_bond_list(self, name, time, time_unit)
+
+
+def read_bonds(data):
+    return np.array(data).reshape( (-1, 2) )
+
+def write_bonds(data):
+    return np.array(data).reshape( (-1,) )
