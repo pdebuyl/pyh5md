@@ -93,7 +93,16 @@ class H5MD_File(object):
             for key in ['creator', 'author', 'creator_version']:
                 if key not in kw:
                     raise ValueError('missing argument "%s" in H5MDFile' % key)
-        self.f = h5py.File(filename, mode)
+        if 'driver' in kwargs:
+            if kwargs['driver']=='mpio':
+                if 'comm' in kwargs:
+                    comm = kwargs['comm']
+                    self.f = h5py.File(filename, mode, driver='mpio', comm=self.comm)
+                    self.f.comm = comm
+                else:
+                    raise ValueError('Driver is %s but comm is not provided' % kwargs['driver'])
+            else:
+                self.f = h5py.File(filename, mode)
         self.modules = []
         if mode=='w':
             h5md_group = self.f.create_group('h5md')
