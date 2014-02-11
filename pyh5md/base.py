@@ -34,12 +34,13 @@ def populate_H5MD_data(g, name, shape, dtype, chunks=None):
     """Creates a step,time,value H5MD data group."""
     g.step = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
     g.time = g.create_dataset('time', shape=(0,), dtype=np.float64, maxshape=(None,))
-    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,)+shape, chunks=chunks)
+    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,None)+shape[1:], chunks=chunks)
 
 class TimeData(h5py.Group):
     """Represents time-dependent data within a H5MD file."""
     def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None, unit=None, time_unit = None):
         """Create a new TimeData object."""
+        self.current_index = 0
         if name in parent.keys():
             self._id = h5py.h5g.open(parent.id, name)
             self.step = self['step']
@@ -60,25 +61,36 @@ class TimeData(h5py.Group):
             if time_unit is not None:
                 self['time'].attrs.create('unit',data=time_unit,dtype=VL_STR)
 
-    def append(self, data, step, time):
-        """Appends a time slice to the data group."""
+    def append(self, data, step, time, region=None):
+        """Appends a time slice to the data group.
+
+        region: tuple (start, stop, [step]) for the dimension 0 of the
+        dataset. The resulting shape must be compatible with data.shape.
+        """
         s = self['step']
         t = self['time']
         v = self['value']
         if not isinstance(data, np.ndarray):
             data = np.array(data, ndmin=0, dtype=v.dtype)
         assert s.shape[0]==t.shape[0] and t.shape[0]==v.shape[0]
-        # Check the shape only for numpy builtin types. This avoids the
-        # misinterpretation of variable-length datasets.
-        if v.dtype.isbuiltin:
-            assert data.shape==v.shape[1:]
         idx = v.shape[0]
         v.resize(idx+1,axis=0)
-        v[-1] = data
+        if region is None:
+            if data.shape[0]>v.shape[1]:
+                v.resize(data.shape[0], axis=1)
+            sel = h5py._hl.selections.select(v.shape,
+                                             (slice(self.current_index,self.current_index+1),slice(0,min(data.shape[0],v.shape[1])),Ellipsis),
+                                             v.id)
+        else:
+            sel = h5py._hl.selections.select(v.shape,
+                                             (slice(self.current_index,self.current_index+1),slice(*region),Ellipsis),
+                                             v.id)
+        v[sel] = data.reshape((1,)+data.shape)
         s.resize(idx+1, axis=0)
-        s[-1] = step
+        s[self.current_index] = step
         t.resize(idx+1, axis=0)
-        t[-1] = time
+        t[self.current_index] = time
+        self.current_index+=1
 
 class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
