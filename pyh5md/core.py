@@ -101,8 +101,8 @@ class H5MD_File(object):
                     self.f.comm = comm
                 else:
                     raise ValueError('Driver is %s but comm is not provided' % kwargs['driver'])
-            else:
-                self.f = h5py.File(filename, mode)
+        else:
+            self.f = h5py.File(filename, mode)
         self.modules = []
         if mode=='w':
             h5md_group = self.f.create_group('h5md')
