@@ -97,7 +97,7 @@ class H5MD_File(object):
             if kwargs['driver']=='mpio':
                 if 'comm' in kwargs:
                     comm = kwargs['comm']
-                    self.f = h5py.File(filename, mode, driver='mpio', comm=self.comm)
+                    self.f = h5py.File(filename, mode, driver='mpio', comm=comm)
                     self.f.comm = comm
                 else:
                     raise ValueError('Driver is %s but comm is not provided' % kwargs['driver'])
