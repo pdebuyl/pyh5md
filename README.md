@@ -1,7 +1,7 @@
 pyh5md : Read and write H5MD files
 ==================================
 
-Copyright © 2012-2013 Pierre de Buyl and contributors
+Copyright © 2012-2014 Pierre de Buyl and contributors
 
 pyh5md is a Python module that facilitate reading and writing
 [H5MD](http://nongnu.org/h5md/) files. H5MD is a file format specification based
