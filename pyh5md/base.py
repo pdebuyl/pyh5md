@@ -34,7 +34,11 @@ def populate_H5MD_data(g, name, shape, dtype, chunks=None):
     """Creates a step,time,value H5MD data group."""
     g.step = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
     g.time = g.create_dataset('time', shape=(0,), dtype=np.float64, maxshape=(None,))
-    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=(None,None)+shape[1:], chunks=chunks)
+    if shape==():
+         maxshape=(None,)
+    else:
+        maxshape=(None, None)+shape[1:]
+    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=maxshape, chunks=chunks)
 
 class TimeData(h5py.Group):
     """Represents time-dependent data within a H5MD file."""
@@ -76,11 +80,13 @@ class TimeData(h5py.Group):
         idx = v.shape[0]
         v.resize(idx+1,axis=0)
         if region is None:
-            if data.shape[0]>v.shape[1]:
+            if len(v.shape)>1 and data.shape[0]>v.shape[1]:
                 v.resize(data.shape[0], axis=1)
-            sel = h5py._hl.selections.select(v.shape,
-                                             (slice(self.current_index,self.current_index+1),slice(0,min(data.shape[0],v.shape[1])),Ellipsis),
-                                             v.id)
+                sel = h5py._hl.selections.select(v.shape,
+                                                 (slice(self.current_index,self.current_index+1),slice(0,min(data.shape[0],v.shape[1])),Ellipsis),
+                                                 v.id)
+            else:
+                sel = self.current_index
         else:
             sel = h5py._hl.selections.select(v.shape,
                                              (slice(self.current_index,self.current_index+1),slice(*region),Ellipsis),
