@@ -57,9 +57,9 @@ class TimeData(h5py.Group):
                 self._id = h5py.h5g.create(parent.id, name)
                 populate_H5MD_data(self, name, shape, dtype, chunks=chunks)
             if unit is not None:
-                self['value'].attrs.create('unit',data=unit,dtype=VL_STR)
+                self['value'].attrs.create('unit',data=unit)
             if time_unit is not None:
-                self['time'].attrs.create('unit',data=time_unit,dtype=VL_STR)
+                self['time'].attrs.create('unit',data=time_unit)
 
     def append(self, data, step, time, region=None):
         """Appends a time slice to the data group.
@@ -100,4 +100,4 @@ class FixedData(h5py.Dataset):
         oid = h5py.h5o.open(parent.id, name)
         h5py.Dataset.__init__(self, oid)
         if unit is not None:
-            self.attrs.create('unit',data=unit,dtype=VL_STR)
+            self.attrs.create('unit',data=unit)

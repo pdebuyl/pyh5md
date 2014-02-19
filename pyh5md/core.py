@@ -108,12 +108,12 @@ class H5MD_File(object):
             h5md_group = self.f.create_group('h5md')
             h5md_group.attrs['version'] = np.array([1,0])
             author_group = h5md_group.create_group('author')
-            author_group.attrs.create('name', data=kwargs['author'], dtype=VL_STR)
+            author_group.attrs.create('name', data=kwargs['author'])
             if 'author_email' in kwargs and kwargs['author_email'] is not None:
-                author_group.attrs.create('email', data=kwargs['author_email'], dtype=VL_STR)
+                author_group.attrs.create('email', data=kwargs['author_email'])
             creator_group = h5md_group.create_group('creator')
-            creator_group.attrs.create('name', data=kwargs['creator'], dtype=VL_STR)
-            creator_group.attrs.create('version', data=kwargs['creator_version'], dtype=VL_STR)
+            creator_group.attrs.create('name', data=kwargs['creator'])
+            creator_group.attrs.create('version', data=kwargs['creator_version'])
             if 'modules' in kwargs:
                 modules = kwargs['modules']
                 assert isinstance(modules, dict)

@@ -29,7 +29,7 @@ class Box(h5py.Group):
         else:
             self._id = h5py.h5g.create(parent.id, 'box')
         self.attrs['dimension'] = dimension
-        self.attrs.create('boundary', data=boundary, dtype=VL_STR)
+        self.attrs.create('boundary', data=boundary)
         if time:
             if edges is not None:
                 self.edges = TimeData(self, 'edges', data=np.asarray(edges), unit=unit, time_unit=time_unit)
@@ -38,7 +38,7 @@ class Box(h5py.Group):
                 ds = create_compact_dataset(self, 'edges', data=edges)
                 if unit is not None:
                     assert isinstance(unit, str)
-                    ds.attrs.create('unit', data=unit, dtype=VL_STR)
+                    ds.attrs.create('unit', data=unit)
 
 
         
