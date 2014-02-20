@@ -1,0 +1,5 @@
+recursive-include examples *.py
+recursive-include licenses *.txt
+include CONTRIBUTORS 
+include LICENSE
+include README.md
