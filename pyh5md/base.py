@@ -30,7 +30,7 @@ def is_h5md(g):
     else:
         return False
 
-def populate_H5MD_data(g, name, shape, dtype, chunks=None):
+def populate_H5MD_data(g, name, shape, dtype, **kwargs):
     """Creates a step,time,value H5MD data group."""
     g.step = g.create_dataset('step', shape=(0,), dtype=np.int32, maxshape=(None,))
     g.time = g.create_dataset('time', shape=(0,), dtype=np.float64, maxshape=(None,))
@@ -38,11 +38,11 @@ def populate_H5MD_data(g, name, shape, dtype, chunks=None):
          maxshape=(None,)
     else:
         maxshape=(None, None)+shape[1:]
-    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=maxshape, chunks=chunks)
+    g.value = g.create_dataset('value', shape=(0,)+shape, dtype=dtype, maxshape=maxshape, **kwargs)
 
 class TimeData(h5py.Group):
     """Represents time-dependent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None, data=None, chunks=None, unit=None, time_unit = None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None, time_unit=None, **kwargs):
         """Create a new TimeData object."""
         self.current_index = 0
         if name in parent.keys():
@@ -56,10 +56,10 @@ class TimeData(h5py.Group):
                     raise Exception('Overspecification')
                 else:
                     self._id = h5py.h5g.create(parent.id, name)
-                    populate_H5MD_data(self, name, data.shape, data.dtype, chunks=chunks)
+                    populate_H5MD_data(self, name, data.shape, data.dtype, **kwargs)
             else:
                 self._id = h5py.h5g.create(parent.id, name)
-                populate_H5MD_data(self, name, shape, dtype, chunks=chunks)
+                populate_H5MD_data(self, name, shape, dtype, **kwargs)
             if unit is not None:
                 self['value'].attrs.create('unit',data=unit)
             if time_unit is not None:
@@ -100,9 +100,9 @@ class TimeData(h5py.Group):
 
 class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
-    def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None):
+    def __init__(self, parent, name, shape=None, dtype=None, data=None, unit=None, **kwargs):
         if name not in parent.keys():
-            parent.create_dataset(name, shape, dtype, data)
+            parent.create_dataset(name, shape, dtype, data, **kwargs)
         oid = h5py.h5o.open(parent.id, name)
         h5py.Dataset.__init__(self, oid)
         if unit is not None:

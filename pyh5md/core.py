@@ -42,7 +42,7 @@ class Walker(object):
         for g in self.walk_list:
             assert(is_h5md(g))
 
-def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit=None):
+def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True, unit=None, time_unit=None, **kwargs):
     """Returns particles data as a FixedData or TimeData."""
     if name is None:
         raise Exception('No name provided')
@@ -58,9 +58,9 @@ def particle_data(group, name=None, shape=None, dtype=None, data=None, time=True
             raise Exception('name does not provide H5MD data')
     else:
         if time:
-            return TimeData(group, name, shape, dtype, data, chunks=chunks, unit=unit, time_unit=time_unit)
+            return TimeData(group, name, shape, dtype, data, unit=unit, time_unit=time_unit, **kwargs)
         else:
-            return FixedData(group, name, shape, dtype, data, unit=unit)
+            return FixedData(group, name, shape, dtype, data, unit=unit, **kwargs)
 
 class ParticlesGroup(h5py.Group):
     """Represents a particles group within a H5MD file."""
@@ -73,9 +73,9 @@ class ParticlesGroup(h5py.Group):
             self._id = h5py.h5g.open(p.id, name)
         else:
             self._id = h5py.h5g.create(p.id, name)
-    def trajectory(self, name, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit=None):
+    def trajectory(self, name, shape=None, dtype=None, data=None, time=True, unit=None, time_unit=None, **kwargs):
         """Returns data as a TimeData or FixedData object."""
-        return particle_data(self, name, shape, dtype, data, time, chunks=chunks, unit=unit, time_unit=time_unit)
+        return particle_data(self, name, shape, dtype, data, time, unit=unit, time_unit=time_unit, **kwargs)
     def box(self, dimension, boundary, edges=None, time=False,
                 unit=None, time_unit=None):
         """Creates a box in the particles group. Returns the box group."""
@@ -146,7 +146,7 @@ class H5MD_File(object):
         it will be created."""
         return ParticlesGroup(self.f, group_name)
 
-    def observable(self, obs_name, shape=None, dtype=None, data=None, time=True, chunks=None, unit=None, time_unit = None):
+    def observable(self, obs_name, shape=None, dtype=None, data=None, time=True, unit=None, time_unit=None, **kwargs):
         """Returns observable data as a TimeData object."""
         if 'observables' in self.f.keys():
             group = self.f['observables']
@@ -164,9 +164,9 @@ class H5MD_File(object):
                 raise Exception('obs_name does not provide H5MD data')
         else:
             if time:
-                return TimeData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, chunks=chunks, unit=unit, time_unit=time_unit)
+                return TimeData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, unit=unit, time_unit=time_unit, **kwargs)
             else:
-                return FixedData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, unit=unit)
+                return FixedData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, unit=unit, **kwargs)
         
     def check(self):
         """Checks the file conformance."""
