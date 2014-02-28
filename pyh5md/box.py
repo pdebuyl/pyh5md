@@ -10,6 +10,7 @@ import numpy as np
 import h5py
 
 from pyh5md.base import VL_STR, TimeData, FixedData
+from pyh5md.utils import create_compact_dataset
 
 class Box(h5py.Group):
     """Represents a simulation box."""
