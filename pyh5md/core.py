@@ -76,9 +76,16 @@ class ParticlesGroup(h5py.Group):
     def trajectory(self, name, shape=None, dtype=None, data=None, time=True, unit=None, time_unit=None, **kwargs):
         """Returns data as a TimeData or FixedData object."""
         return particle_data(self, name, shape, dtype, data, time, unit=unit, time_unit=time_unit, **kwargs)
-    def box(self, dimension, boundary, edges=None, time=False,
+    def box(self, dimension=None, boundary=None, edges=None, time=False,
                 unit=None, time_unit=None):
         """Creates a box in the particles group. Returns the box group."""
+        if dimension is None or boundary is None:
+            item = self['box/edges']
+            if type(item)==h5py.Group:
+                assert is_h5md(item)
+                return TimeData(self['box'], 'edges')
+            elif type(item)==h5py.Dataset:
+                return FixedData(self['box'], 'edges')
         return Box(self, dimension, boundary, edges, time, unit, time_unit)
 
 class H5MD_File(object):

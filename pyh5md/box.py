@@ -9,12 +9,12 @@
 import numpy as np
 import h5py
 
-from pyh5md.base import VL_STR, TimeData, FixedData
+from pyh5md.base import VL_STR, TimeData, FixedData, is_h5md
 from pyh5md.utils import create_compact_dataset
 
 class Box(h5py.Group):
     """Represents a simulation box."""
-    def __init__(self, parent, dimension, boundary, edges=None, time=False, unit=None, time_unit=None):
+    def __init__(self, parent, dimension=None, boundary=None, edges=None, time=False, unit=None, time_unit=None):
         """Initializes a simulation box."""
         assert(len(boundary)==dimension)
         for b in boundary:
