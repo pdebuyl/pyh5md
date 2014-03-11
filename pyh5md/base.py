@@ -97,6 +97,8 @@ class TimeData(h5py.Group):
         t.resize(idx+1, axis=0)
         t[self.current_index] = time
         self.current_index+=1
+    def get(self, idx):
+        return self.value[idx]
 
 class FixedData(h5py.Dataset):
     """Represents time-independent data within a H5MD file."""
@@ -107,3 +109,5 @@ class FixedData(h5py.Dataset):
         h5py.Dataset.__init__(self, oid)
         if unit is not None:
             self.attrs.create('unit',data=unit)
+    def get(self, idx):
+        return self
