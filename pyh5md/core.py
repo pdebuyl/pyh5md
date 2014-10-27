@@ -134,6 +134,10 @@ class H5MD_File(object):
         """Closes the HDF5 file."""
         self.f.close()
 
+    def flush(self):
+        """Flushes the content of the file."""
+        self.f.flush()
+
     def __enter__(self):
         return self
 
@@ -167,7 +171,7 @@ class H5MD_File(object):
                 return TimeData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, unit=unit, time_unit=time_unit, **kwargs)
             else:
                 return FixedData(self.f['observables'],obs_name, shape=shape, dtype=dtype, data=data, unit=unit, **kwargs)
-        
+
     def check(self):
         """Checks the file conformance."""
         # Checks the presence of the global attributes.
