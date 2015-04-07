@@ -1,11 +1,11 @@
 pyh5md is written and maintained by Pierre de Buyl
 
-Copyright 2012-2014 Pierre de Buyl
+Copyright 2012-2015 Pierre de Buyl
 
 Additional contributions
 ------------------------
 
-Konrad Hinsen:
+Konrad Hinsen
 * 2013: use of H5MD_File as context manager
 * 2013: general programming improvements
 * 2013: Addition of units
