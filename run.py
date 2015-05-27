@@ -1,35 +1,43 @@
 import numpy as np
-import nph
-from nph import File, element
+from h5md_module import File, element
 
 N = 32
+DT = 0.1
 
 with File('hop.h5', 'w') as f:
     f.fill_h5md('Pierre', 'run.py', 'N/A')
 
     f.observables = f.require_group('observables')
-    e = element(f.observables, 'v', time='linear', shape=(0,1), maxshape=(None, 1), dtype=int, step=10)
+    v_e = element(f.observables, 'v', store='linear', data=(1,), step=10, step_offset=10, time=5., time_offset=5.)
 
-    all_p = f.particles_group('/particles/all')
+    f.all = f.particles_group('all')
 
-    all_p.create_box(dimension=3, boundary=['periodic']*3, 
-                     #time='fixed', data=(1,1,1.))
-                     time='time', shape=(0,)+(3,), maxshape=(None,3), dtype=np.float64)
+    f.all.create_box(dimension=3, boundary=['periodic']*3,
+                     store='time', shape=(0,)+(3,), maxshape=(None,3), dtype=np.float64)
 
     pos = np.zeros((N, 3))
-    pos_e = element(all_p, 'position', time='time', shape=(0,)+pos.shape, maxshape=(None, None)+pos.shape[1:], dtype=pos.dtype, step_from=all_p.box.edges)
+    pos_e = element(f.all, 'position', store='time', data=pos, step_from=f.all.box.edges)
+
+    vel = np.random.random(pos.shape)-0.5
+    vel_e = element(f.all, 'velocity', store='time', data=vel, time=5.)
+
+    force = np.random.random(pos.shape)-0.5
+    force_e = element(f.all, 'force', store='time', data=force, time=True)
 
     mass = np.ones((N,))*100.0
-
-    element(all_p, 'mass', time='fixed', data=mass)
+    element(f.all, 'mass', store='fixed', data=mass)
 
     record = frozenset([0, 1, 2, 10])
     for step in range(21):
-        pos += np.random.random(pos.shape)*0.1
+        force = np.random.random(pos.shape)-0.5
+        vel += force*DT*0.5/mass.reshape((-1,1))
+        pos += vel*DT
+        vel += force*DT*0.5/mass.reshape((-1,1))
         if step in record:
-            all_p.box.edges.append((1,1,1), step)
+            f.all.box.edges.append((1,1,1), step)
             pos_e.append(pos, step)
-        if step%e.attrs['step'] == 0:
-            e.append(np.random.randint(10))
-
+            vel_e.append(vel, step, step*DT)
+            force_e.append(vel, step, step*DT)
+        if step%v_e['step'][()] == 0:
+            v_e.append(np.random.randint(10))
 

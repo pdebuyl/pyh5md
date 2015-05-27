@@ -8,25 +8,30 @@ class Element(object):
 class FixedElement(Element, h5py.Dataset):
     def __init__(self, loc, name, **kwargs):
         loc.create_dataset(name, **kwargs)
-    def append(self, v, step=None):
+    def append(self, v, step=None, time=None):
         pass
 
-class LinearElement(h5py.Dataset, Element):
+class LinearElement(h5py.Group, Element):
     def __init__(self, loc, name, **kwargs):
-        attrs = {}
-        attrs['step'] = kwargs.pop('step')
-        for a in ('step0', 'time', 'time0'):
-            val = kwargs.pop(a, None)
-            if val is not None:
-                attrs[a] = val
-        d = loc.create_dataset(name, **kwargs)
-        super(LinearElement, self).__init__(d._id)
-        for a in ('step', 'step0', 'time', 'time0'):
-            if a in attrs.keys():
-                self.attrs[a] = attrs[a]
-    def append(self, v, step=None):
-        self.resize(self.shape[0]+1, axis=0)
-        self[-1] = v
+        g = loc.create_group(name)
+        step = kwargs.pop('step')
+        step_offset = kwargs.pop('step_offset', None)
+        time = kwargs.pop('time', None)
+        time_offset = kwargs.pop('time_offset', None)
+        self.value = g.create_dataset('value', **kwargs)
+        super(LinearElement, self).__init__(g._id)
+        self.step = g.create_dataset('step', data=int(step))
+        if step_offset is not None:
+            self.step.attrs['offset'] = int(step_offset)
+            self.step_offset = int(step_offset)
+        if time is not None:
+            self.time = g.create_dataset('time', data=time)
+            if time_offset is not None:
+                self.time.attrs['offset'] = time_offset
+                self.time_offset = time_offset
+    def append(self, v, step=None, time=None):
+        self.value.resize(self.value.shape[0]+1, axis=0)
+        self.value[-1] = v
 
 class TimeElement(Element, h5py.Group):
     def __init__(self, loc, name, **kwargs):
@@ -39,6 +44,17 @@ class TimeElement(Element, h5py.Group):
         else:
             self.step = g.create_dataset('step', dtype=int, shape=(0,), maxshape=(None,))
             self.own_step = True
+        time = kwargs.pop('time', None)
+        if time is not None:
+            if self.own_step:
+                if time==True:
+                    self.time = g.create_dataset('time', dtype=float, shape=(0,), maxshape=(None,))
+                else:
+                    self.time = g.create_dataset('time', data=time)
+            else:
+                g['time'] = self.time = step_from.time
+        else:
+            self.time = None
         self.value = g.create_dataset('value', **kwargs)
     def append(self, v, step, time=None):
         self.value.resize(self.value.shape[0]+1, axis=0)
@@ -46,10 +62,14 @@ class TimeElement(Element, h5py.Group):
         if self.own_step:
             self.step.resize(self.step.shape[0]+1, axis=0)
             self.step[-1] = step
+            if self.time and len(self.time.shape)==1:
+                self.time.resize(self.time.shape[0]+1, axis=0)
+                self.time[-1] = time
+
 
 def element(loc, name, **kwargs):
-    time = kwargs.pop('time')
-    if time=='fixed':
+    store = kwargs.pop('store')
+    if store=='fixed':
         return FixedElement(loc, name, **kwargs)
     data = kwargs.pop('data', None)
     if data is not None:
@@ -58,9 +78,9 @@ def element(loc, name, **kwargs):
         kwargs['shape'] = (0,) + data.shape
         kwargs['maxshape'] = (None,) + data.shape
         kwargs['dtype'] = data.dtype
-    if time=='linear':
+    if store=='linear':
         return LinearElement(loc, name, **kwargs)
-    elif time=='time':
+    elif store=='time':
         return TimeElement(loc, name, **kwargs)
     else:
         raise ValueError
@@ -91,5 +111,3 @@ class ParticlesGroup(h5py.Group):
             self.box.attrs['dimension'] = dimension
             self.box.attrs['boundary'] = boundary
         self.box.edges = element(self.box, 'edges', **kwargs)
-
-
