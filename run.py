@@ -8,7 +8,7 @@ with File('example_for_1.1.h5', 'w',author='Pierre', creator='run.py') as f:
 
     f.observables = f.require_group('observables')
     f.connectivity = f.require_group('connectivity')
-    v_e = element(f.observables, 'v', store='linear', data=(1,), step=10, step_offset=10, time=5., time_offset=5.)
+    v_e = element(f.observables, 'v', store='linear', data=1, step=10, step_offset=10, time=5., time_offset=5.)
 
     f.all = f.particles_group('all')
 
