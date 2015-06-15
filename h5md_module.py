@@ -7,56 +7,117 @@ class Element(object):
 
 class FixedElement(h5py.Dataset, Element):
     def __init__(self, loc, name, **kwargs):
-        d = loc.create_dataset(name, **kwargs)
+        if name in loc:
+            d = loc[name]
+        else:
+            d = loc.create_dataset(name, **kwargs)
         super(FixedElement, self).__init__(d._id)
+        self.step = None
+        self.step_offset = None
+        self.time = None
+        self.time_offset = None
     def append(self, v, step=None, time=None):
         pass
+    def get_by_idx(self, idx):
+        return self
+    @property
+    def value(self):
+        return h5py.Dataset(self._id)
+    @property
+    def element_type(self):
+        return 'FixedElement'
 
 class LinearElement(h5py.Group, Element):
     def __init__(self, loc, name, **kwargs):
-        g = loc.create_group(name)
-        step = kwargs.pop('step')
-        step_offset = kwargs.pop('step_offset', None)
-        time = kwargs.pop('time', None)
-        time_offset = kwargs.pop('time_offset', None)
-        self.value = g.create_dataset('value', **kwargs)
+        is_new = name not in loc
+        g = loc.require_group(name)
+        if is_new:
+            step = kwargs.pop('step')
+            step_offset = kwargs.pop('step_offset', None)
+            time = kwargs.pop('time', None)
+            time_offset = kwargs.pop('time_offset', None)
         super(LinearElement, self).__init__(g._id)
-        self.step = g.create_dataset('step', data=int(step))
-        if step_offset is not None:
-            self.step.attrs['offset'] = int(step_offset)
-            self.step_offset = int(step_offset)
-        if time is not None:
-            self.time = g.create_dataset('time', data=time)
-            if time_offset is not None:
-                self.time.attrs['offset'] = time_offset
+        if is_new:
+            self.value = g.create_dataset('value', **kwargs)
+            g.create_dataset('step', data=int(step))
+            self.step = int(step)
+            if step_offset is not None:
+                g['step'].attrs['offset'] = int(step_offset)
+                self.step_offset = int(step_offset)
+            self.step_offset = None
+            if time is not None:
+                g.create_dataset('time', data=time)
+                self.time = time
+                if time_offset is not None:
+                    g['time'].attrs['offset'] = time_offset
                 self.time_offset = time_offset
+        else:
+            self.step = g['step'][()]
+            if 'offset' in self['step'].attrs:
+                self.step_offset = self['step'].attrs['offset']
+            else:
+                self.step_offset = None
+            self.value = self['value']
+            if 'time' in self:
+                self.time = self['time'][()]
+                if 'offset' in self['time'].attrs:
+                    self.time_offset = self['time'].attrs['offset']
+                else:
+                    self.time_offset = None
+            else:
+                self.time = None
+                self.time_offset = None
+    @property
+    def element_type(self):
+        return 'LinearElement'
     def append(self, v, step=None, time=None):
         self.value.resize(self.value.shape[0]+1, axis=0)
         self.value[-1] = v
+    def get_by_idx(self, idx):
+        return self['value'][idx]
 
-class TimeElement(Element, h5py.Group):
+class TimeElement(h5py.Group, Element):
     def __init__(self, loc, name, **kwargs):
-        g = loc.create_group(name)
-        step_from = kwargs.pop('step_from', None)
-        if step_from is not None:
-            g['step'] = step_from.step
-            self.step = step_from.step
-            self.own_step = False
-        else:
-            self.step = g.create_dataset('step', dtype=int, shape=(0,), maxshape=(None,))
-            self.own_step = True
-        time = kwargs.pop('time', None)
-        if time is not None:
-            if self.own_step:
-                if time==True:
-                    self.time = g.create_dataset('time', dtype=float, shape=(0,), maxshape=(None,))
-                else:
-                    self.time = g.create_dataset('time', data=time)
+        is_new = name not in loc
+        g = loc.require_group(name)
+        if is_new:
+            step_from = kwargs.pop('step_from', None)
+            if step_from is not None:
+                g['step'] = step_from.step
+                self.step = step_from.step
+                self.own_step = False
             else:
-                g['time'] = self.time = step_from.time
+                self.step = g.create_dataset('step', dtype=int, shape=(0,), maxshape=(None,))
+                self.own_step = True
+            time = kwargs.pop('time', None)
+            if time is not None:
+                if self.own_step:
+                    if time==True:
+                        self.time = g.create_dataset('time', dtype=float, shape=(0,), maxshape=(None,))
+                    else:
+                        self.time = g.create_dataset('time', data=time)
+                else:
+                    g['time'] = self.time = step_from.time
+            else:
+                self.time = None
+            self.value = g.create_dataset('value', **kwargs)
         else:
-            self.time = None
-        self.value = g.create_dataset('value', **kwargs)
+            self.step = g['step']
+            if 'offset' in g['step'].attrs:
+                self.step_offset = g['step'].attrs['offset']
+            else:
+                self.step_offset = None
+            if 'time' in g:
+                self.time = g['time']
+                if 'offset' in g['time'].attrs:
+                    self.time_offset = g['time'].attrs['offset']
+                else:
+                    self.time_offset = None
+            else:
+                self.time = None
+                self.time_offset = None
+            self.value = g['value']
+        super(TimeElement, self).__init__(g._id)
     def append(self, v, step, time=None):
         self.value.resize(self.value.shape[0]+1, axis=0)
         self.value[-1] = v
@@ -66,9 +127,26 @@ class TimeElement(Element, h5py.Group):
             if self.time and len(self.time.shape)==1:
                 self.time.resize(self.time.shape[0]+1, axis=0)
                 self.time[-1] = time
-
+    def get_by_idx(self, idx):
+        return self['value'][idx]
+    @property
+    def element_type(self):
+        return 'TimeElement'
 
 def element(loc, name, **kwargs):
+    if name in loc:
+        tmp_element = loc[name]
+        if isinstance(tmp_element,h5py.Group):
+            assert 'value' in tmp_element
+            assert 'step' in tmp_element
+            if tmp_element['step'].shape==():
+                return LinearElement(loc, name, **kwargs)
+            else:
+                return TimeElement(loc, name, **kwargs)
+        elif isinstance(tmp_element, h5py.Dataset):
+            return FixedElement(loc, name, **kwargs)
+        else:
+            return None
     store = kwargs.pop('store')
     if store=='fixed':
         return FixedElement(loc, name, **kwargs)
@@ -87,21 +165,23 @@ def element(loc, name, **kwargs):
         raise ValueError
         
 class File(h5py.File):
-    def __init__(self, *args, **kwargs):
-        author = kwargs.pop('author', 'N/A')
-        author_email = kwargs.pop('author_email', None)
-        creator = kwargs.pop('creator', 'N/A')
-        creator_version = kwargs.pop('creator_version', 'N/A')
-        super(File, self).__init__(*args, **kwargs)
-        g = self.create_group('h5md')
-        g.attrs['version'] = np.array([0,0])
-        g = self.create_group('h5md/author')
-        g.attrs['name'] = author
-        if author_email is not None:
-            g.attrs['email'] = author_email
-        g = self.create_group('h5md/creator')
-        g.attrs['name'] = creator
-        g.attrs['version'] = creator_version
+    def __init__(self, name, mode=None, *args, **kwargs):
+        if mode=='w':
+            author = kwargs.pop('author', 'N/A')
+            author_email = kwargs.pop('author_email', None)
+            creator = kwargs.pop('creator', 'N/A')
+            creator_version = kwargs.pop('creator_version', 'N/A')
+        super(File, self).__init__(name, mode, *args, **kwargs)
+        if mode=='w':
+            g = self.create_group('h5md')
+            g.attrs['version'] = np.array([0,0])
+            g = self.create_group('h5md/author')
+            g.attrs['name'] = author
+            if author_email is not None:
+                g.attrs['email'] = author_email
+            g = self.create_group('h5md/creator')
+            g.attrs['name'] = creator
+            g.attrs['version'] = creator_version
 
     def particles_group(self, name):
         return ParticlesGroup(self, name)
