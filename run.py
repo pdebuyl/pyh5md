@@ -48,8 +48,8 @@ with File('example_for_1.1.h5', 'w',author='Pierre', creator='run.py') as f:
             pos_e.append(pos, step)
             vel_e.append(vel, step, step*DT)
             force_e.append(vel, step, step*DT)
-        if step%v_e['step'][()] == 0:
+        if step%v_e.step == 0:
             v_e.append(np.random.randint(10))
-        if step%idx_e['step'][()] == 0:
+        if step%idx_e.step == 0:
             idx_e.append(idx_list, step)
 
