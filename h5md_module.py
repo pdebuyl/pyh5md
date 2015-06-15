@@ -87,14 +87,21 @@ def element(loc, name, **kwargs):
         raise ValueError
         
 class File(h5py.File):
-    def fill_h5md(self, a, c, c_v):
+    def __init__(self, *args, **kwargs):
+        author = kwargs.pop('author', 'N/A')
+        author_email = kwargs.pop('author_email', None)
+        creator = kwargs.pop('creator', 'N/A')
+        creator_version = kwargs.pop('creator_version', 'N/A')
+        super(File, self).__init__(*args, **kwargs)
         g = self.create_group('h5md')
-        g.attrs['version'] = np.array([1,0])
+        g.attrs['version'] = np.array([0,0])
         g = self.create_group('h5md/author')
-        g.attrs['name'] = a
+        g.attrs['name'] = author
+        if author_email is not None:
+            g.attrs['email'] = author_email
         g = self.create_group('h5md/creator')
-        g.attrs['name'] = c
-        g.attrs['version'] = c_v
+        g.attrs['name'] = creator
+        g.attrs['version'] = creator_version
 
     def particles_group(self, name):
         return ParticlesGroup(self, name)
