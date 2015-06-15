@@ -5,9 +5,10 @@ class Element(object):
     def append(self, *args, **kwargs):
         raise NotImplementedError
 
-class FixedElement(Element, h5py.Dataset):
+class FixedElement(h5py.Dataset, Element):
     def __init__(self, loc, name, **kwargs):
-        loc.create_dataset(name, **kwargs)
+        d = loc.create_dataset(name, **kwargs)
+        super(FixedElement, self).__init__(d._id)
     def append(self, v, step=None, time=None):
         pass
 
