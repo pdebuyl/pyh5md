@@ -2,6 +2,12 @@ import numpy as np
 from pyh5md import File, element
 from mpi4py import MPI
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--collective', action='store_true')
+args = parser.parse_args()
+
 N = 128*128
 DT = 0.1
 
@@ -60,14 +66,14 @@ with File('parallel_example_for_1.1.h5', 'w',author='Pierre', creator='run.py',
         store_ids = False
         if step in record:
             f.all.box.edges.append((1,1,1), step)
-            pos_e.append(pos, step, region=(rank*N,(rank+1)*N))
-            vel_e.append(vel, step, step*DT, region=(rank*N,(rank+1)*N))
+            pos_e.append(pos, step, region=(rank*N,(rank+1)*N), collective=args.collective)
+            vel_e.append(vel, step, step*DT, region=(rank*N,(rank+1)*N), collective=args.collective)
             store_ids = True
         if step%force_e.step == 0:
-            force_e.append(force, region=(rank*N,(rank+1)*N))
+            force_e.append(force, region=(rank*N,(rank+1)*N), collective=args.collective)
             store_ids = True
         if step%v_e.step == 0:
             v_e.append(np.random.randint(10))
             store_ids = True
         if store_ids:
-            id_e.append(local_ids, step, region=(rank*N,(rank+1)*N))
+            id_e.append(local_ids, step, region=(rank*N,(rank+1)*N), collective=args.collective)

@@ -70,10 +70,14 @@ class LinearElement(h5py.Group, Element):
     @property
     def element_type(self):
         return 'LinearElement'
-    def append(self, v, step=None, time=None, region=None):
+    def append(self, v, step=None, time=None, region=None, collective=False):
         self.value.resize(self.value.shape[0]+1, axis=0)
         if region is not None:
-            self.value[-1,region[0]:region[1],...] = v
+            if collective:
+                with self.value.collective:
+                    self.value[-1,region[0]:region[1],...] = v
+            else:
+                self.value[-1,region[0]:region[1],...] = v
         else:
             self.value[-1] = v
     def get_by_idx(self, idx):
@@ -121,10 +125,14 @@ class TimeElement(h5py.Group, Element):
                 self.time_offset = None
             self.value = g['value']
         super(TimeElement, self).__init__(g._id)
-    def append(self, v, step, time=None, region=None):
+    def append(self, v, step, time=None, region=None, collective=False):
         self.value.resize(self.value.shape[0]+1, axis=0)
         if region is not None:
-            self.value[-1,region[0]:region[1],...] = v
+            if collective:
+                with self.value.collective:
+                    self.value[-1,region[0]:region[1],...] = v
+            else:
+                self.value[-1,region[0]:region[1],...] = v
         else:
             self.value[-1] = v
         if self.own_step:
