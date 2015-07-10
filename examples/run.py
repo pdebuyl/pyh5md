@@ -1,5 +1,5 @@
 import numpy as np
-from h5md_module import File, element
+from pyh5md import File, element
 
 N = 32
 DT = 0.1

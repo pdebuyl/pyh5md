@@ -1,5 +1,5 @@
 import numpy as np
-from h5md_module import File, element
+from pyh5md import File, element
 from mpi4py import MPI
 
 N = 128*128
