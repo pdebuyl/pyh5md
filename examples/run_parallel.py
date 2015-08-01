@@ -1,6 +1,7 @@
 import numpy as np
 from pyh5md import File, element
 from mpi4py import MPI
+import time
 
 import argparse
 
@@ -14,7 +15,6 @@ DT = 0.1
 comm = MPI.COMM_WORLD
 rank = comm.rank
 size = comm.size
-print rank
 
 local_ids = np.empty(N, dtype=int)
 
@@ -32,6 +32,8 @@ def assign_ids():
 
 with File('parallel_example_for_1.1.h5', 'w',author='Pierre', creator='run.py',
           driver='mpio', comm=comm) as f:
+
+    start =  time.clock()
 
     f.observables = f.require_group('observables')
     f.connectivity = f.require_group('connectivity')
@@ -77,3 +79,7 @@ with File('parallel_example_for_1.1.h5', 'w',author='Pierre', creator='run.py',
             store_ids = True
         if store_ids:
             id_e.append(local_ids, step, region=(rank*N,(rank+1)*N), collective=args.collective)
+
+    datasize = float(sum([e.value.size for e in [id_e, v_e, force_e, vel_e, pos_e]]) + mass.size) / 1024**2
+    stop = time.clock()
+    if rank==0: print datasize/(stop-start), 'MB/s'
