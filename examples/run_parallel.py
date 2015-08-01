@@ -9,6 +9,12 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--collective', action='store_true')
 args = parser.parse_args()
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--collective', action='store_true')
+args = parser.parse_args()
+
 N = 128*128
 DT = 0.1
 
