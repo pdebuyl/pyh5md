@@ -16,7 +16,7 @@ import h5py
 import h5py.version
 from h5py import h5s, h5t, h5r, h5d
 from h5py._hl import dataset
-from h5py._hl.base import HLObject, py3
+from h5py._hl.base import HLObject
 from h5py._hl import filters
 from h5py._hl import selections as sel
 from h5py._hl import selections2 as sel2
