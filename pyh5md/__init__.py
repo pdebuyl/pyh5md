@@ -15,11 +15,7 @@ for storing molecular data (structures of biophysical compounds, molecular
 dynamics simulations, ...).
 """
 
-try:
-    import h5py
-except ImportError:
-    print "pyh5md requires the h5py library."
-    exit()
+import h5py
 
 from core import *
 
