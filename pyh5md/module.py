@@ -59,3 +59,11 @@ class ThermodynamicsModule(Module):
         self.known_versions = [(0,1)]
         super(ThermodynamicsModule, self).__init__(loc, version)
 register_module(ThermodynamicsModule)
+
+class MosaicModule(Module):
+    """The 'mosaic' H5MD module."""
+    _name = 'mosaic'
+    def __init__(self, loc, version=None):
+        self.known_versions = [(0,1)]
+        super(MosaicModule, self).__init__(loc, version)
+register_module(MosaicModule)
