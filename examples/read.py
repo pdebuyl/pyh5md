@@ -1,10 +1,21 @@
+#!/usr/bin/env python
+"""
+Open a H5MD file and displays the elements in the given particles group
+"""
+from __future__ import print_function, division
+
+import argparse
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('file', type=str, help='H5MD file')
+parser.add_argument('--group', type=str, help='name of the particles group', required=True)
+args = parser.parse_args()
+
 import numpy as np
 from pyh5md import File, element
 
-import sys
-
-with File(sys.argv[1], 'r') as f:
-    all_particles = f.particles_group('all')
+with File(args.file, 'r') as f:
+    all_particles = f.particles_group(args.group)
 
     for loc, name in (
         (f['observables'], 'v'),
@@ -18,7 +29,10 @@ with File(sys.argv[1], 'r') as f:
         if name not in loc:
             continue
         el = element(loc, name)
-        print '---------------------------------------------------------------'
-        print '%-10s ----------------------------------------------------' % name
-        print el.element_type
-        print el.value.shape, el.step, el.step_offset, el.time, el.time_offset, el.value
+        print('---------------------------------------------------------------')
+        print('%-10s ----------------------------------------------------' % name)
+        print(el.element_type)
+        print("shape   :", el.value.shape)
+        print("step    :", el.step, el.step_offset)
+        print("time    :", el.time, el.time_offset)
+        print("value   :", el.value)
