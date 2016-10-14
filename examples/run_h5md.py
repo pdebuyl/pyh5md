@@ -1,9 +1,7 @@
 import numpy as np
-import nph
-from nph import File, element
+from pyh5md import File, element
 
-f = File('particles_3d.h5', 'w')
-f.fill_h5md('Pierre de Buyl', 'run_h5md', 'N/A')
+f = File('particles_3d.h5', 'w', author='Pierre de Buyl', creator='run_h5md', creator_version='N/A')
 
 # Creating atom group
 at = f.particles_group('atoms')
