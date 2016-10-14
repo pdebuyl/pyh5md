@@ -8,13 +8,18 @@ import argparse
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('file', type=str, help='H5MD file')
-parser.add_argument('--group', type=str, help='name of the particles group', required=True)
+parser.add_argument('--group', type=str, help='name of the particles group')
 args = parser.parse_args()
 
 import numpy as np
 from pyh5md import File, element
 
 with File(args.file, 'r') as f:
+    if args.group is None:
+        print('Particles groups in this file:', *list(f['particles'].keys()))
+        import sys
+        sys.exit()
+    assert args.group in f['particles'], "group not found in particles group"
     all_particles = f.particles_group(args.group)
 
     for loc, name in (
