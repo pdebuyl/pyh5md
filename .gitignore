@@ -1,4 +1,10 @@
 *~
-*.pyc
+*.o
+*.py[ocd]
+.DS_Store?
 *.h5
 
+build
+dist
+
+MANIFEST
