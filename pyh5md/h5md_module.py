@@ -1,6 +1,9 @@
 import numpy as np
 import h5py
 
+CHUNK_0_MAX=32
+CHUNK_1_MAX=128
+
 class Element(object):
     def append(self, *args, **kwargs):
         raise NotImplementedError
@@ -153,6 +156,20 @@ class TimeElement(h5py.Group, Element):
     def __repr__(self):
         return 'H5MD TimeElement'
 
+def default_chunks(shape):
+    result = list(shape)
+    if len(shape)==0:
+        raise ValueError
+    if shape==(0,):
+        return (64,)
+    if shape[0]==0:
+        result[0] = CHUNK_0_MAX
+        result[1] = min(CHUNK_1_MAX, shape[1])
+        return tuple(result)
+    else:
+        result[:2] = CHUNK_0_MAX, CHUNK_1_MAX
+        return tuple(np.minimum(result,shape))
+
 
 def element(loc, name, **kwargs):
     if name in loc:
@@ -171,6 +188,11 @@ def element(loc, name, **kwargs):
     store = kwargs.pop('store')
     if store=='fixed':
         return FixedElement(loc, name, **kwargs)
+    if 'shape' in kwargs:
+        assert 'data' not in kwargs
+        kwargs['shape'] = (0,) + kwargs['shape']
+        kwargs['chunks'] = default_chunks(kwargs['shape'])
+        kwargs['maxshape'] = (None,) + kwargs['shape'][1:]
     data = kwargs.pop('data', None)
     if data is not None:
         if type(data) is not np.ndarray:
