@@ -26,6 +26,8 @@ class FixedElement(h5py.Dataset, Element):
     @property
     def element_type(self):
         return 'FixedElement'
+    def __repr__(self):
+        return 'H5MD FixedElement'
 
 class LinearElement(h5py.Group, Element):
     def __init__(self, loc, name, **kwargs):
@@ -82,6 +84,8 @@ class LinearElement(h5py.Group, Element):
             self.value[-1] = v
     def get_by_idx(self, idx):
         return self['value'][idx]
+    def __repr__(self):
+        return 'H5MD LinearElement'
 
 class TimeElement(h5py.Group, Element):
     def __init__(self, loc, name, **kwargs):
@@ -146,6 +150,9 @@ class TimeElement(h5py.Group, Element):
     @property
     def element_type(self):
         return 'TimeElement'
+    def __repr__(self):
+        return 'H5MD TimeElement'
+
 
 def element(loc, name, **kwargs):
     if name in loc:
