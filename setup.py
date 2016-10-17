@@ -8,7 +8,7 @@ from setuptools import setup
 setup(name="pyh5md",
       version="1.0-dev",
       description="pyh5md - Read and write H5MD files",
-      long_desc=__doc__,
+      long_description=__doc__,
       author="Pierre de Buyl",
       author_email="pdebuyl at pdebuyl dot be",
       license="BSD",
