@@ -217,7 +217,7 @@ class File(h5py.File):
         super(File, self).__init__(name, mode, *args, **kwargs)
         if mode=='w':
             g = self.create_group('h5md')
-            g.attrs['version'] = np.array([0,0])
+            g.attrs['version'] = np.array([1,1])
             g = self.create_group('h5md/author')
             g.attrs['name'] = author
             if author_email is not None:
