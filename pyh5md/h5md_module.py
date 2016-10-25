@@ -192,13 +192,19 @@ def element(loc, name, **kwargs):
         assert 'data' not in kwargs
         kwargs['shape'] = (0,) + kwargs['shape']
         kwargs['chunks'] = default_chunks(kwargs['shape'])
-        kwargs['maxshape'] = (None,) + kwargs['shape'][1:]
+        if 'maxshape' in kwargs:
+            kwargs['maxshape'] = (None,) + kwargs['maxshape']
+        else:
+            kwargs['maxshape'] = (None,) + kwargs['shape'][1:]
     data = kwargs.pop('data', None)
     if data is not None:
         if type(data) is not np.ndarray:
             data = np.asarray(data)
         kwargs['shape'] = (0,) + data.shape
-        kwargs['maxshape'] = (None,) + data.shape
+        if 'maxshape' in kwargs:
+            kwargs['maxshape'] = (None,) + kwargs['maxshape']
+        else:
+            kwargs['maxshape'] = (None,) + data.shape
         kwargs['dtype'] = data.dtype
     if store=='linear':
         return LinearElement(loc, name, **kwargs)
