@@ -231,6 +231,12 @@ class File(h5py.File):
             g = self.create_group('h5md/creator')
             g.attrs['name'] = creator
             g.attrs['version'] = creator_version
+        else:
+            if 'h5md' not in self:
+                raise KeyError("h5md group not found in file")
+            g = self['h5md']
+            assert 'author' in g
+            assert 'creator' in g
 
     def particles_group(self, name):
         return ParticlesGroup(self, name)
