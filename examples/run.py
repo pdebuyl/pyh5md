@@ -13,7 +13,7 @@ with File('example_for_1.1.h5', 'w',author='Pierre', creator='run.py') as f:
     f.all = f.particles_group('all')
 
     f.all.create_box(dimension=3, boundary=['periodic']*3,
-                     store='time', shape=(0,)+(3,), maxshape=(None,3), dtype=np.float64)
+                     store='time', shape=(3,), dtype=np.float64)
 
     pos = np.zeros((N, 3))
     pos_e = element(f.all, 'position', store='time', data=pos, step_from=f.all.box.edges)
