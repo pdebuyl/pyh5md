@@ -27,9 +27,9 @@ r_time = part_pos.time
 # Compute the time-averaged mean-square displacement,
 # drop large correlation times due to insufficient statistics
 T = r.shape[0]
-msd = np.empty((T/4, r.shape[1]))
-time = r_time[:T/4]
-for n in range(T/4):
+msd = np.empty((T//4, r.shape[1]))
+time = r_time[:T//4]
+for n in range(T//4):
     # the sum over "axis=2" is over the spatial components of the positions
     msd[n] = np.mean(np.sum(pow(r[n:] - r[:T-n], 2), axis=2), axis=0)
 
