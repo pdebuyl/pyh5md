@@ -109,7 +109,7 @@ class TimeElement(h5py.Group, Element):
                     if time==True:
                         self.time = g.create_dataset('time', dtype=float, shape=(0,), maxshape=(None,))
                     else:
-                        self.time = g.create_dataset('time', data=time)
+                        raise ValueError("Time must be True or None for TimeElement")
                 else:
                     g['time'] = self.time = step_from.time
             else:
