@@ -3,7 +3,9 @@
 *.py[ocd]
 .DS_Store?
 *.h5
+*pycache*
 
+.cache/
 build
 dist
 
