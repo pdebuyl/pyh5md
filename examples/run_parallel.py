@@ -1,19 +1,14 @@
+from __future__ import print_function, division
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--collective', action='store_true')
+args = parser.parse_args()
+
 import numpy as np
 from pyh5md import File, element
 from mpi4py import MPI
 import time
-
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--collective', action='store_true')
-args = parser.parse_args()
-
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--collective', action='store_true')
-args = parser.parse_args()
 
 N = 128*128
 DT = 0.1
@@ -21,6 +16,7 @@ DT = 0.1
 comm = MPI.COMM_WORLD
 rank = comm.rank
 size = comm.size
+print(rank)
 
 local_ids = np.empty(N, dtype=int)
 
@@ -35,11 +31,9 @@ def assign_ids():
     else:
         comm.Recv(local_ids, source=0, tag=11)
 
-
+start =  time.clock()
 with File('parallel_example_for_1.1.h5', 'w',author='Pierre', creator='run.py',
           driver='mpio', comm=comm) as f:
-
-    start =  time.clock()
 
     f.observables = f.require_group('observables')
     f.connectivity = f.require_group('connectivity')
@@ -48,18 +42,18 @@ with File('parallel_example_for_1.1.h5', 'w',author='Pierre', creator='run.py',
     f.all = f.particles_group('all')
 
     f.all.create_box(dimension=3, boundary=['periodic']*3,
-                     store='time', shape=(0,)+(3,), maxshape=(None,3), dtype=np.float64)
+                     store='time', shape=(3,), dtype=np.float64)
 
-    id_e = element(f.all, 'id', store='time', shape=(0, N*size,), dtype=int, maxshape=(None, N*size))
+    id_e = element(f.all, 'id', store='time', shape=(N*size,), dtype=int)
 
     pos = np.zeros((N, 3))
-    pos_e = element(f.all, 'position', store='time', shape=(0, N*size, 3), maxshape=(None, N*size, 3), dtype=np.float64, step_from=f.all.box.edges)
+    pos_e = element(f.all, 'position', store='time', shape=(N*size, 3), dtype=np.float64, step_from=f.all.box.edges)
 
     vel = np.random.random(pos.shape)-0.5
-    vel_e = element(f.all, 'velocity', store='time', shape=(0, N*size, 3), maxshape=(None, N*size, 3), dtype=np.float64, time=5.)
+    vel_e = element(f.all, 'velocity', store='time', shape=(N*size, 3), dtype=np.float64, time=True)
 
     force = np.random.random(pos.shape)-0.5
-    force_e = element(f.all, 'force', store='linear', shape=(0, N*size, 3), maxshape=(None, N*size, 3), dtype=np.float64, step=1, time=DT)
+    force_e = element(f.all, 'force', store='linear', shape=(N*size, 3), dtype=np.float64, step=1, time=DT)
 
     mass = np.ones((N,))*100.0
     element(f.all, 'mass', store='fixed', shape=(N*size,), dtype=np.float64)
@@ -87,5 +81,8 @@ with File('parallel_example_for_1.1.h5', 'w',author='Pierre', creator='run.py',
             id_e.append(local_ids, step, region=(rank*N,(rank+1)*N), collective=args.collective)
 
     datasize = float(sum([e.value.size for e in [id_e, v_e, force_e, vel_e, pos_e]]) + mass.size) / 1024**2
-    stop = time.clock()
-    if rank==0: print datasize/(stop-start), 'MB/s'
+
+
+stop = time.clock()
+if rank==0:
+    print(datasize/(stop-start), 'MB/s')
