@@ -19,7 +19,7 @@ with File('example_for_1.1.h5', 'w',author='Pierre', creator='run.py') as f:
     pos_e = element(f.all, 'position', store='time', data=pos, step_from=f.all.box.edges)
 
     vel = np.random.random(pos.shape)-0.5
-    vel_e = element(f.all, 'velocity', store='time', data=vel, time=5.)
+    vel_e = element(f.all, 'velocity', store='time', data=vel)
 
     force = np.random.random(pos.shape)-0.5
     force_e = element(f.all, 'force', store='time', data=force, time=True)
