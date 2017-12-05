@@ -1,7 +1,7 @@
 pyh5md : Read and write H5MD files
 ==================================
 
-Copyright © 2012-2016 Pierre de Buyl and contributors  
+Copyright 2012-2017 Pierre de Buyl and contributors  
 *License:* BSD
 
 pyh5md is a library to read and write easily H5MD files. [H5MD][] is a file
@@ -11,6 +11,9 @@ on top of [h5py][], the HDF5 for Python library by Andrew Colette.
 [H5MD]: http://nongnu.org/h5md/
 [HDF5]: http://www.hdfgroup.org/HDF5/
 [h5py]: http://h5py.org/
+
+pyh5md used to define a complex class structure. Since version 1.0.0.dev1, a light
+subclassing of h5py's classes is used instead.
 
 Install
 -------
