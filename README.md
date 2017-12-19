@@ -35,3 +35,25 @@ Once pyh5md is installed:
     python random_walk_1d.py
 
 executes an example program that generates the H5MD file `walk_1d.h5`.
+
+Usage
+-----
+
+To write data to a particles group named "atoms", with a fixed set of positions:
+
+    from pyh5md import File, element
+	kwargs = {'creator': 'pyh5md README example',
+	          'author': 'Pierre de Buyl',
+			  }
+	with File('new_file.h5', 'w', **kwargs) as f:
+	    g = f.particles_group('atoms')
+		g.create_box(dimension=3, boundary=['none']*3)
+		element(g, 'position', store='fixed', data=np.random.random(size=(32, 3)))
+
+To read data from a H5MD file created with, for instance, LAMMPS:
+
+    from pyh5md import File, element
+    with File('dump_3d.h5', 'r') as f:
+        g = f.particles_group('all')
+        box_edges = element(g, 'box/edges').value[0]
+        position = element(g, 'position').value[:]
