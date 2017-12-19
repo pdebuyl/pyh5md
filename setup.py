@@ -6,7 +6,7 @@ pyh5md is built on top of h5py, the Python HDF5 library by Andrew Colette.
 from setuptools import setup
 
 setup(name="pyh5md",
-      version="1.0.0.dev1",
+      version="1.0.0",
       description="pyh5md - Read and write H5MD files",
       long_description=__doc__,
       author="Pierre de Buyl",
