@@ -252,6 +252,6 @@ class ParticlesGroup(h5py.Group):
         if dimension is not None and boundary is not None:
             assert len(boundary)==dimension
             self.box.attrs['dimension'] = dimension
-            self.box.attrs['boundary'] = np.string_(boundary)
+            self.box.attrs['boundary'] = list(boundary)
         if len(kwargs)>0:
             self.box.edges = element(self.box, 'edges', **kwargs)
