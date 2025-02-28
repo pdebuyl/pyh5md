@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyh5md"
+authors = [
+    {name = "Pierre de Buyl", email = "pdebuyl@pdebuyl.be"},
+]
+description = "pyh5md - Read and write H5MD files"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: Python :: 3',
+]
+dependencies = [
+    "numpy", "h5py"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools]
+packages = ["pyh5md"]
+
+[tool.setuptools.dynamic]
+version = {file = "pyh5md/VERSION"}
