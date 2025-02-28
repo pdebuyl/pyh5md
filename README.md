@@ -1,7 +1,7 @@
 pyh5md : Read and write H5MD files
 ==================================
 
-Copyright 2012-2017 Pierre de Buyl and contributors  
+Copyright 2012-2017,2025 Pierre de Buyl and contributors  
 *License:* BSD
 
 pyh5md is a library to read and write easily H5MD files. [H5MD][] is a file
@@ -41,19 +41,23 @@ Usage
 
 To write data to a particles group named "atoms", with a fixed set of positions:
 
-    from pyh5md import File, element
-	kwargs = {'creator': 'pyh5md README example',
-	          'author': 'Pierre de Buyl',
-			  }
-	with File('new_file.h5', 'w', **kwargs) as f:
-	    g = f.particles_group('atoms')
-		g.create_box(dimension=3, boundary=['none']*3)
-		element(g, 'position', store='fixed', data=np.random.random(size=(32, 3)))
+```
+from pyh5md import File, element
+kwargs = {'creator': 'pyh5md README example',
+	      'author': 'Pierre de Buyl',
+          }
+with File('new_file.h5', 'w', **kwargs) as f:
+    g = f.particles_group('atoms')
+    g.create_box(dimension=3, boundary=['none']*3)
+    element(g, 'position', store='fixed', data=np.random.random(size=(32, 3)))
+```
 
 To read data from a H5MD file created with, for instance, LAMMPS:
 
-    from pyh5md import File, element
-    with File('dump_3d.h5', 'r') as f:
-        g = f.particles_group('all')
-        box_edges = element(g, 'box/edges').value[0]
-        position = element(g, 'position').value[:]
+```
+from pyh5md import File, element
+with File('dump_3d.h5', 'r') as f:
+    g = f.particles_group('all')
+    box_edges = element(g, 'box/edges').value[0]
+    position = element(g, 'position').value[:]
+```
