@@ -56,7 +56,7 @@ plt.figure()
 # Obtain and plot the center_of_mass observable
 f.observables = f.require_group('observables')
 obs_com = element(f.observables, 'center_of_mass')
-plt.plot(obs_com.time, obs_com.value, 'k-')
+plt.plot(obs_com.time[:], obs_com.value[:], 'k-')
 plt.xlabel(r'$t$')
 plt.ylabel(r'center of mass')
 

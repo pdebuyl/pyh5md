@@ -33,7 +33,7 @@ time=0.
 for i in range(800):
     step+=1
     time+=.1
-    r += -1 + 2*np.random.random_integers(0,1,r.shape)
+    r += -1 + 2*np.random.randint(0,2,r.shape)
     # Append the current position data to the H5MD file.
     part_pos.append(r, step, time)
     obs_com.append(r[:,0].mean(), step, time)
