@@ -23,6 +23,10 @@ dynamic = ["version"]
 [project.optional-dependencies]
 test = ["pytest"]
 
+[project.urls]
+Homepage = "https://github.com/pdebuyl/pyh5md"
+Issues = "https://github.com/pdebuyl/pyh5md/issues"
+
 [tool.setuptools]
 packages = ["pyh5md"]
 
