@@ -18,13 +18,13 @@ subclassing of h5py's classes is used instead.
 Install
 -------
 
-    python setup.py install --user
+It is recommended to install in a virtual environment. Then,
 
-or
+    pip install pyh5md
 
-    pip install --user .
+installs pyh5md in that virtual environment. To install from the git repository:
 
-installs pyh5md for the current user
+    pip install .
 
 Examples
 --------
